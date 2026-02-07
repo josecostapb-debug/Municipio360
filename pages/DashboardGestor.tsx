@@ -15,232 +15,200 @@ interface DashboardGestorProps {
 }
 
 const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, municipality }) => {
+  // Cores do Cockpit
   const COLORS = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-  const ECONOMIC_COLORS = ['#0ea5e9', '#f43f5e', '#10b981', '#f59e0b'];
-  const HEALTH_COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#6366f1', '#94a3b8'];
-
-  // --- DADOS DEMOGRÁFICOS ---
-  const genderData = [
-    { name: 'Feminino', value: Math.floor(municipality.population * 0.515) },
-    { name: 'Masculino', value: Math.floor(municipality.population * 0.485) },
-  ];
-
-  // --- DADOS DE TRABALHO ---
-  const peaValue = metrics.find(m => m.id.includes('pea'))?.value || Math.floor(municipality.population * 0.48);
-  const formalValue = metrics.find(m => m.id.includes('formal'))?.value || Math.floor(municipality.population * 0.28);
-  const informalValue = peaValue - formalValue;
-
-  const laborData = [
-    { name: 'Emprego Formal', value: formalValue },
-    { name: 'Sem Registro Formal', value: Math.max(0, informalValue) },
-  ];
-
-  const sectorData = [
-    { name: 'Serviços', value: Math.floor(peaValue * 0.55) },
-    { name: 'Comércio', value: Math.floor(peaValue * 0.25) },
-    { name: 'Indústria', value: Math.floor(peaValue * 0.12) },
-    { name: 'Agropecuária', value: Math.floor(peaValue * 0.08) },
-  ].sort((a, b) => b.value - a.value);
-
-  // --- DADOS DE MORTALIDADE ---
-  const totalDeaths = metrics.find(m => m.id.startsWith('h3'))?.value || 0;
   
-  const deathGenderData = [
-    { name: 'Masculino', value: Math.floor(totalDeaths * 0.58) },
-    { name: 'Feminino', value: Math.floor(totalDeaths * 0.42) },
-  ];
+  // Métricas Fiscais específicas
+  const lrfMetric = metrics.find(m => m.id.startsWith('lrf-percent'))!;
+  const rclMetric = metrics.find(m => m.id.startsWith('rcl'))!;
+  const gastoRealMetric = metrics.find(m => m.id.startsWith('gasto-pessoal-rs'))!;
+  const approvalMetric = metrics.find(m => m.id.startsWith('popularity'))!;
 
-  const deathCauseData = [
-    { name: 'Circulatório', value: Math.floor(totalDeaths * 0.28) },
-    { name: 'Neoplasias', value: Math.floor(totalDeaths * 0.18) },
-    { name: 'Externas', value: Math.floor(totalDeaths * 0.15) },
-    { name: 'Respiratório', value: Math.floor(totalDeaths * 0.12) },
-    { name: 'Outros', value: Math.floor(totalDeaths * 0.27) },
-  ].sort((a, b) => b.value - a.value);
+  // Lógica de Cor LRF (TCE-PB)
+  const getLRFColor = (val: number) => {
+    if (val <= 48.6) return '#10b981'; // Verde
+    if (val <= 51.3) return '#f59e0b'; // Amarelo
+    return '#ef4444'; // Vermelho
+  };
 
-  // --- DADOS DE RH ---
-  const hrMetrics = metrics.filter(m => m.id.includes('hr'));
-  const efCount = hrMetrics.find(m => m.id.includes('hr3'))?.value || 0;
-  const nonEfCount = hrMetrics.find(m => m.id.includes('hr5'))?.value || 0;
-  const efCost = hrMetrics.find(m => m.id.includes('hr2'))?.value || 0;
-  const nonEfCost = hrMetrics.find(m => m.id.includes('hr4'))?.value || 0;
-
-  const employeeDistribution = [
-    { name: 'Efetivos', value: efCount },
-    { name: 'Não-Efetivos', value: nonEfCount },
-  ];
-
-  // Métricas de destaque
-  const highlightMetrics = [
-    metrics.find(m => m.id.startsWith('h2')), // Nascimentos
-    metrics.find(m => m.id.startsWith('h3')), // Óbitos
-    metrics.find(m => m.id.startsWith('e2')), // Alunos
-    metrics.find(m => m.id.startsWith('e1')), // Frequência
-  ].filter(Boolean) as Metric[];
+  // Lógica de Aprovação
+  const getApprovalColor = (val: number) => {
+    if (val >= 60) return '#10b981';
+    if (val >= 40) return '#f59e0b';
+    return '#ef4444';
+  };
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
       <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-6 gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Painel Executivo 360°</h1>
-          <p className="text-slate-500 font-bold uppercase text-[10px] md:text-xs tracking-widest mt-1">Prefeitura de {municipality.name} - PB</p>
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            COCKPIT EXECUTIVO 360°
+          </h1>
+          <p className="text-slate-500 font-bold uppercase text-[10px] md:text-xs tracking-widest mt-1">
+            Centro de Comando Governamental • {municipality.name} - PB
+          </p>
         </div>
         <div className="text-left md:text-right w-full md:w-auto">
-           <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[9px] md:text-[10px] font-black uppercase mb-1 inline-block">Sincronizado</div>
-           <p className="text-[10px] md:text-xs text-slate-400 font-medium italic block">Monitorando {municipality.population.toLocaleString()} habitantes</p>
+           <div className="px-3 py-1 bg-slate-900 text-blue-400 rounded-full text-[9px] md:text-[10px] font-black uppercase mb-1 inline-block border border-blue-900/50">Sistemas Ativos</div>
+           <p className="text-[10px] md:text-xs text-slate-400 font-mono block">REF: {new Date().toLocaleDateString('pt-BR')} | LAT: -7.12 | LNG: -34.84</p>
         </div>
       </header>
 
       <AIAdvisor metrics={metrics} municipality={municipality} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
-        <div className="p-5 rounded-2xl border bg-blue-600 text-white shadow-lg relative overflow-hidden">
-          <p className="text-[10px] md:text-xs font-bold uppercase opacity-80 mb-1">População Total</p>
-          <p className="text-2xl md:text-3xl font-black">{municipality.population.toLocaleString()}</p>
-          <p className="text-[10px] mt-2 font-medium opacity-70 italic tracking-tighter">Estimativa Atual</p>
-          <div className="absolute top-[-20px] right-[-20px] opacity-10">
-            <svg className="w-20 h-20 md:w-24 md:h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-          </div>
+      {/* --- MÓDULO INSTRUMENTOS FISCAIS & POLÍTICOS --- */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        
+        {/* VELOCÍMETRO LRF (GAUGE) */}
+        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden border border-white/5">
+           <div className="flex justify-between items-start mb-6">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Limite LRF (Gasto Pessoal)</h3>
+              <span className="font-mono text-[10px] text-blue-500">TCE-PB STANDARD</span>
+           </div>
+
+           <div className="relative flex justify-center py-4">
+              {/* Custom SVG Gauge */}
+              <svg className="w-48 h-32" viewBox="0 0 100 60">
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" />
+                <path 
+                  d="M 10 50 A 40 40 0 0 1 90 50" 
+                  fill="none" 
+                  stroke={getLRFColor(lrfMetric.value)} 
+                  strokeWidth="12" 
+                  strokeLinecap="round" 
+                  strokeDasharray={`${(lrfMetric.value / 60) * 126} 126`} 
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute bottom-6 text-center">
+                 <p className="text-4xl font-black">{lrfMetric.value}%</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase">Percentual Atual</p>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/5">
+              <div>
+                 <p className="text-[10px] text-slate-500 font-bold uppercase">RCL Projetada</p>
+                 <p className="font-mono text-sm">R$ {(rclMetric.value / 1000000).toFixed(1)}M</p>
+              </div>
+              <div className="text-right">
+                 <p className="text-[10px] text-slate-500 font-bold uppercase">Gasto Pessoal</p>
+                 <p className="font-mono text-sm text-blue-400">R$ {(gastoRealMetric.value / 1000000).toFixed(1)}M</p>
+              </div>
+           </div>
+           
+           <div className="mt-4 flex gap-2">
+              <div className="h-1 flex-1 bg-emerald-500/20 rounded-full"><div className="h-full bg-emerald-500 rounded-full w-full"></div></div>
+              <div className="h-1 flex-1 bg-amber-500/20 rounded-full"><div className={`h-full bg-amber-500 rounded-full ${lrfMetric.value > 48.6 ? 'w-full' : 'w-0'}`}></div></div>
+              <div className="h-1 flex-1 bg-rose-500/20 rounded-full"><div className={`h-full bg-rose-500 rounded-full ${lrfMetric.value > 51.3 ? 'w-full' : 'w-0'}`}></div></div>
+           </div>
         </div>
-        {highlightMetrics.map(m => <StatCard key={m.id} metric={m} />)}
+
+        {/* TERMÔMETRO DE POPULARIDADE */}
+        <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 flex flex-col">
+           <div className="flex justify-between items-start mb-8">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Termômetro Político</h3>
+              <div className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-lg">LIVE</div>
+           </div>
+
+           <div className="flex flex-1 items-end gap-10 px-4">
+              {/* Thermometer Visual */}
+              <div className="w-10 h-full bg-slate-100 rounded-full relative overflow-hidden border border-slate-200 flex flex-col justify-end">
+                 <div 
+                    style={{ height: `${approvalMetric.value}%`, backgroundColor: getApprovalColor(approvalMetric.value) }} 
+                    className="w-full transition-all duration-1000 rounded-t-full shadow-[0_0_20px_rgba(0,0,0,0.1)]"
+                 ></div>
+                 <div className="absolute inset-x-0 bottom-0 h-10 w-full rounded-full border-t border-white/20" style={{ backgroundColor: getApprovalColor(approvalMetric.value) }}></div>
+              </div>
+
+              <div className="flex-1 pb-4">
+                 <p className="text-6xl font-black text-slate-900 tracking-tighter">{approvalMetric.value}%</p>
+                 <p className="text-sm font-bold text-slate-400 mt-1 uppercase">Aprovação Popular</p>
+                 
+                 <div className="mt-6 space-y-3">
+                    <div className="flex items-center gap-2">
+                       <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                       <p className="text-[10px] font-bold text-slate-600">Positivo: 64%</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <div className="w-2 h-2 rounded-full bg-slate-300"></div>
+                       <p className="text-[10px] font-bold text-slate-600">Neutro: 21%</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                       <p className="text-[10px] font-bold text-slate-600">Negativo: 15%</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        {/* MAPA DE CALOR DE SATISFAÇÃO (SIMULADO) */}
+        <div className="bg-slate-100 rounded-[2.5rem] p-8 border border-slate-200 relative overflow-hidden group">
+           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Mapeamento de Bairros</h3>
+           <div className="w-full h-48 bg-slate-200 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center relative">
+              <svg className="w-full h-full text-slate-300 opacity-50" fill="currentColor" viewBox="0 0 200 100">
+                <path d="M20,20 Q40,10 60,30 T100,20 T140,40 T180,20" fill="none" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              {/* Simulating hotspots */}
+              <div className="absolute top-10 left-10 w-8 h-8 bg-emerald-400/30 rounded-full animate-pulse blur-md"></div>
+              <div className="absolute bottom-10 right-20 w-12 h-12 bg-rose-400/30 rounded-full animate-pulse blur-md"></div>
+              <div className="absolute top-20 right-40 w-6 h-6 bg-amber-400/30 rounded-full animate-pulse blur-md"></div>
+              
+              <p className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-100/40 backdrop-blur-[2px]">Mapeamento Geo-Político Ativo</p>
+           </div>
+           <div className="mt-6 space-y-2">
+              <div className="flex justify-between text-[10px] font-bold">
+                 <span className="text-slate-500">MAIOR APROVAÇÃO:</span>
+                 <span className="text-emerald-600 uppercase">Centro Histórico</span>
+              </div>
+              <div className="flex justify-between text-[10px] font-bold">
+                 <span className="text-slate-500">MAIOR CRÍTICA:</span>
+                 <span className="text-rose-600 uppercase">Zona Sul (Saneamento)</span>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* --- MÓDULOS OPERACIONAIS (ESTILO ANTERIOR PRESERVADO) --- */}
+      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+        <div className="w-2 h-6 bg-indigo-600 rounded-full shrink-0"></div>
+        Indicadores Operacionais de Base
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
+        {metrics.filter(m => !m.id.includes('lrf') && !m.id.includes('rcl') && !m.id.includes('gasto') && !m.id.includes('popularity')).slice(0, 4).map(m => (
+          <StatCard key={m.id} metric={m} />
+        ))}
       </div>
 
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-blue-600 rounded-full shrink-0"></div>
-        Dinâmica Populacional e Social
-      </h2>
-      
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-        {/* Distribuição por Gênero */}
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-6 text-center">População por Gênero</h3>
-          <div className="h-56 md:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={genderData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} dataKey="value" paddingAngle={5}>
-                  {genderData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index]} />)}
-                </Pie>
-                <Tooltip />
-                <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* GRÁFICO OPERACIONAL (EX: SAÚDE/EDUC) */}
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+           <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6">Eficiência de Serviços</h3>
+           <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={metrics.filter(m => m.department === 'Saúde' || m.department === 'Educação').slice(0, 4)}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 'bold'}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10}} />
+                  <Tooltip cursor={{fill: '#f8fafc'}} />
+                  <Bar dataKey="value" fill="#6366f1" radius={[10, 10, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+           </div>
         </div>
 
-        {/* Empregabilidade */}
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Trabalho (PEA)</h3>
-          <div className="h-56 md:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={laborData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} dataKey="value" paddingAngle={5}>
-                  {laborData.map((entry, index) => <Cell key={`cell-${index}`} fill={ECONOMIC_COLORS[index % ECONOMIC_COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-                <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Matriz Produtiva */}
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm md:col-span-2 lg:col-span-1">
-          <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Empresas por Setor</h3>
-          <div className="h-56 md:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={sectorData} margin={{ left: 10, right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 'bold'}} width={70} />
-                <Tooltip cursor={{fill: 'transparent'}} />
-                <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </section>
-
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-rose-600 rounded-full shrink-0"></div>
-        Saúde e Vigilância
-      </h2>
-
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-12">
-        {/* Óbitos por Gênero */}
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Óbitos por Gênero</h3>
-          <div className="h-64 md:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={deathGenderData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} dataKey="value" paddingAngle={8}>
-                  <Cell fill="#ef4444" />
-                  <Cell fill="#f43f5e" />
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{fontSize: '10px'}}/>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Óbitos por Causa */}
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Causas de Óbito</h3>
-          <div className="h-64 md:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={deathCauseData} margin={{ left: 20, right: 30 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 'bold'}} width={100} />
-                <Tooltip />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                  {deathCauseData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={HEALTH_COLORS[index % HEALTH_COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </section>
-
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-emerald-600 rounded-full shrink-0"></div>
-        Operação e Gestão
-      </h2>
-
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        {/* Gestão de RH */}
-        <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h3 className="text-base md:text-lg font-bold text-slate-800 mb-6">Quadro de Servidores</h3>
-          <div className="h-44 md:h-48 mb-6">
-             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={employeeDistribution}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10}} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} barSize={40} />
-              </BarChart>
-             </ResponsiveContainer>
-          </div>
-          <div className="bg-slate-50 p-4 md:p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-center border border-slate-100 gap-4 text-center sm:text-left">
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Custo de Folha</p>
-              <p className="text-xl md:text-2xl font-black text-slate-900">R$ {((efCost + nonEfCost) / 1000000).toFixed(1)}M</p>
-            </div>
-            <div className="flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full shrink-0">
-              <span className="text-[10px] font-black uppercase">LRF em Conformidade</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Alertas */}
-        <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h3 className="text-base md:text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">Prioridades Atuais</h3>
+        {/* ALERTAS CRÍTICOS */}
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+          <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+            Prioridades do Dia
+          </h3>
           <div className="space-y-4">
             {alerts.length > 0 ? alerts.map(alert => (
-              <div key={alert.id} className={`p-4 md:p-5 rounded-2xl border-l-4 shadow-sm transition-transform hover:scale-[1.01] ${alert.status === 'VERMELHO' ? 'bg-rose-50 border-rose-500' : 'bg-amber-50 border-amber-500'}`}>
+              <div key={alert.id} className={`p-5 rounded-2xl border-l-4 shadow-sm transition-transform hover:scale-[1.01] ${alert.status === 'VERMELHO' ? 'bg-rose-50 border-rose-500' : 'bg-amber-50 border-amber-500'}`}>
                 <div className="flex justify-between items-start mb-1">
                   <span className="text-[9px] font-black uppercase opacity-60">{alert.department}</span>
                   <span className="text-[9px] font-bold text-slate-400">{alert.date}</span>
@@ -249,21 +217,11 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
                 <p className="text-[10px] md:text-xs text-slate-600 mt-1 leading-relaxed">{alert.description}</p>
               </div>
             )) : (
-              <div className="py-12 md:py-16 text-center text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest">Sem pendências críticas</div>
+              <div className="py-16 text-center text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest">Sem alertas críticos</div>
             )}
           </div>
         </div>
       </section>
-
-      {/* Grid Final */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-12">
-         {metrics.filter(m => 
-            m.id.startsWith('h1') || 
-            m.id.startsWith('f1') || 
-            m.id.startsWith('i1') || 
-            m.id.startsWith('e3')
-         ).map(m => <StatCard key={m.id} metric={m} />)}
-      </div>
     </div>
   );
 };

@@ -12,7 +12,8 @@ export enum Department {
   EDUCACAO = 'Educação',
   INFRAESTRUTURA = 'Infraestrutura',
   FINANCAS = 'Finanças',
-  ASSISTENCIA = 'Assistência Social'
+  ASSISTENCIA = 'Assistência Social',
+  POLITICO = 'Gestão Política'
 }
 
 export type Status = 'VERDE' | 'AMARELO' | 'VERMELHO';
@@ -26,7 +27,7 @@ export interface Municipality {
 
 export interface Metric {
   id: string;
-  municipalityId: string; // Vínculo com o município
+  municipalityId: string;
   name: string;
   value: number;
   unit: string;
@@ -41,7 +42,7 @@ export interface Metric {
 
 export interface Alert {
   id: string;
-  municipalityId: string; // Vínculo com o município
+  municipalityId: string;
   title: string;
   description: string;
   status: Status;
@@ -53,6 +54,16 @@ export interface User {
   id: string;
   name: string;
   role: UserRole;
-  municipalityId: string; // Vínculo do usuário com sua prefeitura
+  municipalityId: string;
   department?: Department;
+}
+
+export interface Vote {
+  id: string;
+  municipalityId: string;
+  rating: number; // 0 to 100
+  comment: string;
+  sentiment: 'POSITIVO' | 'NEUTRO' | 'NEGATIVO';
+  coords?: { lat: number; lng: number };
+  timestamp: string;
 }

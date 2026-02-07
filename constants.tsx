@@ -1,7 +1,6 @@
 
 import { Metric, Department, Alert, Municipality } from './types';
 
-// Lista exaustiva dos 223 municípios da Paraíba
 export const MUNICIPALITIES: Municipality[] = [
   { id: 'joao-pessoa', name: 'João Pessoa', region: 'Litoral', population: 833932 },
   { id: 'campina-grande', name: 'Campina Grande', region: 'Agreste', population: 411807 },
@@ -241,115 +240,75 @@ export const generateMetricsForMunicipality = (m: Municipality): Metric[] => {
   const popFactor = m.population / 411807; 
   const randomVar = (base: number, range: number) => base + (Math.random() * range - range / 2);
   
+  // RCL Estimada (Receita Corrente Líquida)
+  const rcl = Math.floor(randomVar(120000000, 20000000) * popFactor);
+  // Gasto Pessoal (Simulando variação próxima aos limites da LRF)
+  const gastoPessoalPercent = randomVar(49.5, 5); 
+  const gastoPessoal = (rcl * gastoPessoalPercent) / 100;
+
+  // Popularidade (0 a 100)
+  const popularity = Math.floor(randomVar(65, 15));
+
   return [
-    // SAÚDE
+    // --- MÓDULO COCKPIT FISCAL (LRF) ---
     { 
-      id: `h1-${m.id}`, 
+      id: `lrf-percent-${m.id}`, 
       municipalityId: m.id, 
-      name: 'Ocupação de Leitos', 
-      value: Math.floor(randomVar(75, 15)), 
+      name: 'Gasto com Pessoal (LRF)', 
+      value: Number(gastoPessoalPercent.toFixed(2)), 
       unit: '%', 
-      previousValue: 72, 
-      department: Department.SAUDE, 
-      thresholds: { warning: 80, critical: 90, higherIsBetter: false } 
+      previousValue: 47.2, 
+      department: Department.FINANCAS, 
+      thresholds: { warning: 48.6, critical: 51.3, higherIsBetter: false } 
     },
     { 
-      id: `h2-${m.id}`, 
+      id: `rcl-${m.id}`, 
       municipalityId: m.id, 
-      name: 'Nascimentos (Mês)', 
-      value: Math.max(1, Math.floor(randomVar(500, 100) * popFactor)), 
-      unit: 'bebês', 
-      previousValue: Math.floor(480 * popFactor), 
-      department: Department.SAUDE, 
-      thresholds: { warning: 200 * popFactor, critical: 100 * popFactor, higherIsBetter: true } 
+      name: 'Receita Corrente Líquida (RCL)', 
+      value: rcl, 
+      unit: 'R$', 
+      previousValue: rcl * 0.95, 
+      department: Department.FINANCAS, 
+      thresholds: { warning: 0, critical: 0, higherIsBetter: true } 
     },
     { 
-      id: `h3-${m.id}`, 
+      id: `gasto-pessoal-rs-${m.id}`, 
       municipalityId: m.id, 
-      name: 'Óbitos (Mês)', 
-      value: Math.max(0, Math.floor(randomVar(200, 50) * popFactor)), 
-      unit: 'pessoas', 
-      previousValue: Math.floor(210 * popFactor), 
-      department: Department.SAUDE, 
-      thresholds: { warning: 300 * popFactor, critical: 400 * popFactor, higherIsBetter: false } 
+      name: 'Gasto Real Pessoal', 
+      value: gastoPessoal, 
+      unit: 'R$', 
+      previousValue: gastoPessoal * 0.98, 
+      department: Department.FINANCAS, 
+      thresholds: { warning: 0, critical: 0, higherIsBetter: false } 
     },
+
+    // --- MÓDULO POLÍTICO ---
+    { 
+      id: `popularity-${m.id}`, 
+      municipalityId: m.id, 
+      name: 'Aprovação da Gestão', 
+      value: popularity, 
+      unit: '%', 
+      previousValue: 62, 
+      department: Department.POLITICO, 
+      thresholds: { warning: 50, critical: 40, higherIsBetter: true } 
+    },
+
+    // SAÚDE
+    { id: `h1-${m.id}`, municipalityId: m.id, name: 'Ocupação de Leitos', value: Math.floor(randomVar(75, 15)), unit: '%', previousValue: 72, department: Department.SAUDE, thresholds: { warning: 80, critical: 90, higherIsBetter: false } },
+    { id: `h2-${m.id}`, municipalityId: m.id, name: 'Nascimentos (Mês)', value: Math.max(1, Math.floor(randomVar(500, 100) * popFactor)), unit: 'bebês', previousValue: Math.floor(480 * popFactor), department: Department.SAUDE, thresholds: { warning: 200 * popFactor, critical: 100 * popFactor, higherIsBetter: true } },
+    { id: `h3-${m.id}`, municipalityId: m.id, name: 'Óbitos (Mês)', value: Math.max(0, Math.floor(randomVar(200, 50) * popFactor)), unit: 'pessoas', previousValue: Math.floor(210 * popFactor), department: Department.SAUDE, thresholds: { warning: 300 * popFactor, critical: 400 * popFactor, higherIsBetter: false } },
     
     // EDUCAÇÃO
-    { 
-      id: `e1-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Frequência Escolar', 
-      value: Math.floor(randomVar(94, 4)), 
-      unit: '%', 
-      previousValue: 92, 
-      department: Department.EDUCACAO, 
-      thresholds: { warning: 90, critical: 80, higherIsBetter: true } 
-    },
-    { 
-      id: `e2-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Alunos Matriculados', 
-      value: Math.floor(randomVar(50000, 5000) * popFactor), 
-      unit: 'alunos', 
-      previousValue: Math.floor(48000 * popFactor), 
-      department: Department.EDUCACAO, 
-      thresholds: { warning: 30000 * popFactor, critical: 20000 * popFactor, higherIsBetter: true } 
-    },
-    { 
-      id: `e3-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Taxa de Evasão', 
-      value: Number(randomVar(2.5, 1).toFixed(1)), 
-      unit: '%', 
-      previousValue: 3.1, 
-      department: Department.EDUCACAO, 
-      thresholds: { warning: 5, critical: 8, higherIsBetter: false } 
-    },
-
-    // FINANÇAS E ECONOMIA
-    { 
-      id: `f1-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Arrecadação Trimestral', 
-      value: Math.floor(randomVar(4500000, 1000000) * popFactor * 3), 
-      unit: 'R$', 
-      previousValue: Math.floor(4200000 * popFactor * 3), 
-      department: Department.FINANCAS, 
-      thresholds: { warning: 3000000 * popFactor, critical: 2500000 * popFactor, higherIsBetter: true } 
-    },
-    { id: `pea-${m.id}`, municipalityId: m.id, name: 'Pop. Econom. Ativa', value: Math.floor(m.population * 0.48), unit: 'pers', previousValue: Math.floor(m.population * 0.47), department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
-    { id: `formal-${m.id}`, municipalityId: m.id, name: 'Emprego Formal', value: Math.floor(m.population * 0.28), unit: 'pers', previousValue: Math.floor(m.population * 0.27), department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
+    { id: `e1-${m.id}`, municipalityId: m.id, name: 'Frequência Escolar', value: Math.floor(randomVar(94, 4)), unit: '%', previousValue: 92, department: Department.EDUCACAO, thresholds: { warning: 90, critical: 80, higherIsBetter: true } },
+    { id: `e2-${m.id}`, municipalityId: m.id, name: 'Alunos Matriculados', value: Math.floor(randomVar(50000, 5000) * popFactor), unit: 'alunos', previousValue: Math.floor(48000 * popFactor), department: Department.EDUCACAO, thresholds: { warning: 30000 * popFactor, critical: 20000 * popFactor, higherIsBetter: true } },
+    { id: `e3-${m.id}`, municipalityId: m.id, name: 'Taxa de Evasão', value: Number(randomVar(2.5, 1).toFixed(1)), unit: '%', previousValue: 3.1, department: Department.EDUCACAO, thresholds: { warning: 5, critical: 8, higherIsBetter: false } },
 
     // INFRAESTRUTURA
-    { 
-      id: `i1-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Obras Pavimentação', 
-      value: Math.max(1, Math.floor(randomVar(8, 6) * (popFactor * 5))), 
-      unit: 'frentes', 
-      previousValue: 5, 
-      department: Department.INFRAESTRUTURA, 
-      thresholds: { warning: 3, critical: 1, higherIsBetter: true } 
-    },
+    { id: `i1-${m.id}`, municipalityId: m.id, name: 'Obras Pavimentação', value: Math.max(1, Math.floor(randomVar(8, 6) * (popFactor * 5))), unit: 'frentes', previousValue: 5, department: Department.INFRAESTRUTURA, thresholds: { warning: 3, critical: 1, higherIsBetter: true } },
 
     // ASSISTÊNCIA
     { id: `pop-total-${m.id}`, municipalityId: m.id, name: 'População Total', value: m.population, unit: 'hab', previousValue: m.population * 0.99, department: Department.ASSISTENCIA, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
-    { 
-      id: `a1-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Famílias no CadÚnico', 
-      value: Math.floor(m.population * 0.35), 
-      unit: 'famílias', 
-      previousValue: Math.floor(m.population * 0.34), 
-      department: Department.ASSISTENCIA, 
-      thresholds: { warning: m.population * 0.5, critical: m.population * 0.6, higherIsBetter: false } 
-    },
-    
-    // RH (Necessário para os gráficos de pizza e barra)
-    { id: `hr2-${m.id}`, municipalityId: m.id, name: 'Custo Folha Efetivos', value: Math.floor(34000000 * popFactor), unit: 'R$', previousValue: 33000000 * popFactor, department: Department.FINANCAS, thresholds: { warning: 40000000, critical: 45000000, higherIsBetter: false } },
-    { id: `hr3-${m.id}`, municipalityId: m.id, name: 'Servidores Efetivos', value: Math.max(10, Math.floor(7200 * popFactor)), unit: 'pers', previousValue: Math.floor(7100 * popFactor), department: Department.FINANCAS, thresholds: { warning: 5000, critical: 4000, higherIsBetter: true } },
-    { id: `hr4-${m.id}`, municipalityId: m.id, name: 'Custo Folha Não-Ef.', value: Math.floor(14000000 * popFactor), unit: 'R$', previousValue: 13500000 * popFactor, department: Department.FINANCAS, thresholds: { warning: 18000000, critical: 20000000, higherIsBetter: false } },
-    { id: `hr5-${m.id}`, municipalityId: m.id, name: 'Servidores Não-Ef.', value: Math.max(5, Math.floor(5300 * popFactor)), unit: 'pers', previousValue: Math.floor(5100 * popFactor), department: Department.FINANCAS, thresholds: { warning: 6000, critical: 7000, higherIsBetter: false } },
   ];
 };
 
