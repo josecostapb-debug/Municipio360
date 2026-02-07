@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Backdrop para Mobile - Apenas visível quando o menu está aberto no celular */}
+      {/* Backdrop para Mobile */}
       <div 
         className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsOpen(false)}
@@ -54,8 +54,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           <h1 className="text-xl font-black flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-xs font-black tracking-tighter shrink-0">PB</div>
-            Voz Gestora
+            <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-xs font-black tracking-tighter shrink-0">360</div>
+            Municipio360
           </h1>
           
           <div className="bg-slate-800/30 p-4 rounded-[1.5rem] border border-slate-700/50">
@@ -82,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </nav>
 
-        {/* Rodapé com botão Sair (sempre visível no menu) */}
+        {/* Rodapé */}
         <div className="p-6 border-t border-slate-800 bg-black/10 shrink-0">
           <div className="flex items-center gap-3 mb-6 bg-slate-800/20 p-3 rounded-2xl">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-sm font-black border border-indigo-400/30 shadow-inner shrink-0">

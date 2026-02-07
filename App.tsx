@@ -84,12 +84,11 @@ const App: React.FC = () => {
         />
       );
     }
-    // Feed e outros podem ser implementados a seguir
-    return <div className="p-10 font-bold text-slate-400">Em desenvolvimento...</div>;
+    return <div className="p-10 font-bold text-slate-400 text-center uppercase tracking-widest text-xs">Em desenvolvimento...</div>;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-row overflow-hidden font-inter">
+    <div className="min-h-screen bg-slate-50 flex flex-row overflow-hidden font-inter text-slate-900">
       
       {/* MODO GESTOR (SIDEBAR + MAIN) */}
       {viewMode === 'GESTOR' && user && (
@@ -127,14 +126,14 @@ const App: React.FC = () => {
           
           <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl max-w-xl w-full relative z-10 animate-in zoom-in-95 duration-500">
             <div className="text-center mb-10">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-600 rounded-[2rem] mx-auto flex items-center justify-center text-white text-2xl md:text-3xl font-black mb-6 shadow-xl shadow-indigo-200">PB</div>
-              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Fala, Paraíba!</h1>
-              <p className="text-slate-500 font-bold mt-2 text-[10px] md:text-xs uppercase tracking-[0.2em]">Ouvidoria Digital e Transparência</p>
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-600 rounded-[2rem] mx-auto flex items-center justify-center text-white text-2xl md:text-3xl font-black mb-6 shadow-xl shadow-indigo-200">360</div>
+              <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Municipio360</h1>
+              <p className="text-slate-500 font-bold mt-2 text-[10px] md:text-xs uppercase tracking-[0.2em]">Ouvidoria Digital e Gestão Estratégica</p>
             </div>
             
             <input 
               type="text" 
-              placeholder="Buscar Município..." 
+              placeholder="Buscar seu Município..." 
               className="w-full px-6 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-semibold mb-8 shadow-inner"
               value={searchTerm} 
               onChange={(e) => setSearchTerm(e.target.value)} 
@@ -148,7 +147,7 @@ const App: React.FC = () => {
                     <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">{m.region}</span>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => handleCitizenAccess(m)} className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100">Avaliar Gestão</button>
+                    <button onClick={() => handleCitizenAccess(m)} className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100">Avaliar Cidade</button>
                     <button onClick={() => handleLoginMunicipality(m)} className="flex-1 py-4 bg-slate-900 text-slate-400 rounded-2xl hover:bg-black hover:text-white transition-all font-black text-[10px] uppercase tracking-widest">Gabinete</button>
                   </div>
                 </div>
@@ -165,7 +164,7 @@ const App: React.FC = () => {
           onClose={logout}
           onSuccess={(newFeedback) => {
             setFeedbacks(prev => [ { ...newFeedback, id: Date.now().toString(), status: 'PENDENTE' }, ...prev ]);
-            setNotif("Obrigado pela participação!");
+            setNotif("Avaliação enviada com sucesso!");
             setTimeout(() => setNotif(null), 3000);
             logout();
           }}
