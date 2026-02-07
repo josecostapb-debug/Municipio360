@@ -23,7 +23,6 @@ export enum Category {
   SUGESTAO = 'Sugestão'
 }
 
-// Fix: Added Department enum used in EnvioDados.tsx
 export enum Department {
   SAUDE = 'Saúde',
   EDUCACAO = 'Educação',
@@ -35,8 +34,6 @@ export enum Department {
 }
 
 export type Sentiment = 'POSITIVO' | 'NEUTRO' | 'NEGATIVO';
-
-// Fix: Added Status type used in StatCard.tsx
 export type Status = 'VERDE' | 'AMARELO' | 'VERMELHO';
 
 export interface Municipality {
@@ -49,12 +46,14 @@ export interface Feedback {
   id: string;
   municipalityId: string;
   citizenName: string;
+  cpfOrVoterId: string; // Novo: Validação de identidade
+  whatsapp: string;      // Novo: Canal de resposta
   neighborhood: string;
   areaType: AreaType;
   category: Category;
   sentiment: Sentiment;
   comment: string;
-  rating: number; // 1 a 5
+  rating: number; // Agora 1 a 10
   timestamp: string;
   status: 'LIDO' | 'PENDENTE' | 'RESOLVIDO';
 }
@@ -64,11 +63,9 @@ export interface User {
   name: string;
   role: UserRole;
   municipalityId: string;
-  // Fix: Added optional department property for governmental users
   department?: Department;
 }
 
-// Fix: Added Metric interface used in StatCard.tsx
 export interface Metric {
   id: string;
   name: string;

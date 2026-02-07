@@ -34,6 +34,12 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
     return 'bg-slate-50 border-slate-100 text-slate-700';
   };
 
+  const handleResponder = (f: Feedback) => {
+    const message = encodeURIComponent(`Olá, ${f.citizenName}! Aqui é do Gabinete do Prefeito de ${municipality.name}. Recebemos seu relato sobre ${f.category} ("${f.comment.substring(0, 30)}...") e gostaríamos de conversar sobre isso.`);
+    const whatsappUrl = `https://wa.me/${f.whatsapp}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <div className="p-4 md:p-8 lg:p-10">
       <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -67,7 +73,6 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* CARD TERMÔMETRO - DESTAQUE TOTAL */}
         <div className="lg:col-span-1 bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center relative group">
           <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 rounded-t-full"></div>
           
@@ -103,7 +108,6 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
           </div>
         </div>
 
-        {/* AI ADVISOR */}
         <div className="lg:col-span-2">
           <AIAdvisor feedbacks={cityFeedbacks} municipality={municipality} />
           
@@ -121,7 +125,6 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* CARD FEEDBACKS - ÁREA CENTRAL */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-8 border-b border-slate-50 flex justify-between items-center">
@@ -150,9 +153,12 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
                         </div>
                       </div>
                     </div>
-                    <span className="text-[9px] font-black text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl uppercase tracking-tighter shrink-0 bg-white">
-                      {f.category}
-                    </span>
+                    <div className="text-right">
+                       <span className="block text-[9px] font-black text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl uppercase tracking-tighter bg-white mb-1">
+                        {f.category}
+                      </span>
+                      <span className="text-[10px] font-black text-indigo-600">Nota: {f.rating}/10</span>
+                    </div>
                   </div>
                   
                   <p className="text-slate-700 text-sm font-medium leading-relaxed pl-1">
@@ -160,14 +166,18 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
                   </p>
                   
                   <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-50">
-                    <div className="flex gap-1.5">
-                      {[...Array(5)].map((_, i) => (
-                        <div key={i} className={`w-2 h-2 rounded-full ${i < f.rating ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
-                      ))}
+                    <div className="flex items-center gap-3 text-[9px] font-black text-slate-400 uppercase">
+                       <span className="bg-slate-100 px-2 py-1 rounded">CPF/Título: {f.cpfOrVoterId.substring(0,3)}...</span>
                     </div>
                     <div className="flex gap-3">
                       <button className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors">Marcar Lido</button>
-                      <button className="bg-slate-900 text-white px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-md">Responder</button>
+                      <button 
+                        onClick={() => handleResponder(f)}
+                        className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-md flex items-center gap-2"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.941-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217s.231.001.332.005c.109.004.253-.041.397.303.145.348.491 1.2.534 1.289.044.09.072.195.014.311-.058.116-.087.188-.173.289-.087.101-.183.225-.261.303-.093.094-.191.196-.081.385.11.19.488.805 1.047 1.301.721.639 1.327.838 1.515.931.188.093.297.078.406-.048.11-.127.462-.536.586-.717.124-.181.249-.152.419-.087.171.065 1.083.511 1.27.605.188.094.312.14.356.216.043.077.043.446-.1.851z"/></svg>
+                        Responder via WhatsApp
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -183,7 +193,6 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
           </div>
         </div>
 
-        {/* COLUNA LATERAL - STATUS DE ZONAS */}
         <div className="lg:col-span-1 space-y-8">
            <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm">
              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-8">Zonas Críticas</h3>
@@ -214,14 +223,14 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipali
            <div className="bg-indigo-600 p-8 rounded-[3rem] text-white shadow-xl relative overflow-hidden group">
               <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-3xl transition-transform group-hover:scale-125"></div>
               <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-4">Metas de Gestão</p>
-              <h4 className="text-xl font-black mb-2 leading-tight">Redução de Críticas em Educação</h4>
-              <p className="text-xs text-indigo-100/60 mb-8 leading-relaxed">Faltam 12 dias para o fechamento da meta trimestral.</p>
+              <h4 className="text-xl font-black mb-2 leading-tight">Melhorar Nota Média Geral</h4>
+              <p className="text-xs text-indigo-100/60 mb-8 leading-relaxed">Nota atual: {(cityFeedbacks.reduce((acc, f) => acc + f.rating, 0) / total).toFixed(1)} / 10</p>
               <div className="flex items-center justify-between text-[10px] font-black mb-2">
-                <span>Progresso</span>
-                <span>65%</span>
+                <span>Meta: 8.5</span>
+                <span>72%</span>
               </div>
               <div className="h-2 bg-black/10 rounded-full overflow-hidden">
-                <div className="w-[65%] h-full bg-white rounded-full"></div>
+                <div className="w-[72%] h-full bg-white rounded-full"></div>
               </div>
            </div>
         </div>
