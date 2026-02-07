@@ -13,7 +13,9 @@ export enum Department {
   INFRAESTRUTURA = 'Infraestrutura',
   FINANCAS = 'Finanças',
   ASSISTENCIA = 'Assistência Social',
-  POLITICO = 'Gestão Política'
+  POLITICO = 'Gestão Política',
+  SEGURANCA = 'Segurança Pública',
+  TRANSITO = 'Segurança Viária'
 }
 
 export type Status = 'VERDE' | 'AMARELO' | 'VERMELHO';
@@ -23,6 +25,18 @@ export interface Municipality {
   name: string;
   region: string;
   population: number;
+}
+
+export interface HospitalUnit {
+  name: string;
+  occupancy: number;
+  totalBeds: number;
+}
+
+export interface HealthNetworkNode {
+  neighborhood: string;
+  ubs: number;
+  upa: number;
 }
 
 export interface Metric {
@@ -38,6 +52,7 @@ export interface Metric {
     higherIsBetter: boolean;
   };
   department: Department;
+  details?: any; // Para dados complexos como lista de hospitais
 }
 
 export interface Alert {
@@ -61,7 +76,7 @@ export interface User {
 export interface Vote {
   id: string;
   municipalityId: string;
-  rating: number; // 0 to 100
+  rating: number; 
   comment: string;
   sentiment: 'POSITIVO' | 'NEUTRO' | 'NEGATIVO';
   coords?: { lat: number; lng: number };

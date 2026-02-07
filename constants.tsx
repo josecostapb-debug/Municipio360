@@ -1,5 +1,5 @@
 
-import { Metric, Department, Alert, Municipality } from './types';
+import { Metric, Department, Alert, Municipality, HospitalUnit, HealthNetworkNode } from './types';
 
 export const MUNICIPALITIES: Municipality[] = [
   { id: 'joao-pessoa', name: 'João Pessoa', region: 'Litoral', population: 833932 },
@@ -18,221 +18,6 @@ export const MUNICIPALITIES: Municipality[] = [
   { id: 'monteiro', name: 'Monteiro', region: 'Cariri', population: 32277 },
   { id: 'esperanca', name: 'Esperança', region: 'Agreste', population: 31215 },
   { id: 'catole-do-rocha', name: 'Catolé do Rocha', region: 'Sertão', population: 30661 },
-  { id: 'agua-branca', name: 'Água Branca', region: 'Sertão', population: 10390 },
-  { id: 'aguiar', name: 'Aguiar', region: 'Sertão', population: 5612 },
-  { id: 'alagoa-grande', name: 'Alagoa Grande', region: 'Brejo', population: 28439 },
-  { id: 'alagoa-nova', name: 'Alagoa Nova', region: 'Brejo', population: 21013 },
-  { id: 'alagoinha', name: 'Alagoinha', region: 'Agreste', population: 14555 },
-  { id: 'alcantil', name: 'Alcantil', region: 'Cariri', population: 5585 },
-  { id: 'algodao-de-jandaira', name: 'Algodão de Jandaíra', region: 'Agreste', population: 2584 },
-  { id: 'alhandra', name: 'Alhandra', region: 'Litoral Sul', population: 19717 },
-  { id: 'amparo', name: 'Amparo', region: 'Cariri', population: 2253 },
-  { id: 'aparecida', name: 'Aparecida', region: 'Sertão', population: 8442 },
-  { id: 'aracagi', name: 'Araçagi', region: 'Agreste', population: 17112 },
-  { id: 'arara', name: 'Arara', region: 'Brejo', population: 13545 },
-  { id: 'araruna', name: 'Araruna', region: 'Curimataú', population: 20549 },
-  { id: 'areia', name: 'Areia', region: 'Brejo', population: 22633 },
-  { id: 'areia-de-baraunas', name: 'Areia de Baraúnas', region: 'Sertão', population: 2125 },
-  { id: 'areial', name: 'Areial', region: 'Agreste', population: 7006 },
-  { id: 'aroeiras', name: 'Aroeiras', region: 'Agreste', population: 19356 },
-  { id: 'assuncao', name: 'Assunção', region: 'Cariri', population: 4021 },
-  { id: 'baia-da-traicao', name: 'Baía da Traição', region: 'Litoral Nordeste', population: 9145 },
-  { id: 'bananeiras', name: 'Bananeiras', region: 'Brejo', population: 23134 },
-  { id: 'barauna', name: 'Baraúna', region: 'Curimataú', population: 5013 },
-  { id: 'barra-de-santa-rosa', name: 'Barra de Santa Rosa', region: 'Curimataú', population: 15632 },
-  { id: 'barra-de-santana', name: 'Barra de Santana', region: 'Agreste', population: 8205 },
-  { id: 'barra-de-sao-miguel', name: 'Barra de São Miguel', region: 'Cariri', population: 6032 },
-  { id: 'belem', name: 'Belém', region: 'Agreste', population: 17654 },
-  { id: 'belem-do-brejo-do-cruz', name: 'Belém do Brejo do Cruz', region: 'Sertão', population: 7453 },
-  { id: 'bernardino-batista', name: 'Bernardino Batista', region: 'Sertão', population: 3512 },
-  { id: 'boa-ventura', name: 'Boa Ventura', region: 'Sertão', population: 6102 },
-  { id: 'boa-vista', name: 'Boa Vista', region: 'Cariri', population: 7042 },
-  { id: 'bom-jesus', name: 'Bom Jesus', region: 'Sertão', population: 2584 },
-  { id: 'bom-sucesso', name: 'Bom Sucesso', region: 'Sertão', population: 5012 },
-  { id: 'bonito-de-santa-fe', name: 'Bonito de Santa Fé', region: 'Sertão', population: 12134 },
-  { id: 'boqueirao', name: 'Boqueirão', region: 'Cariri', population: 17598 },
-  { id: 'borborema', name: 'Borborema', region: 'Brejo', population: 5321 },
-  { id: 'brejo-do-cruz', name: 'Brejo do Cruz', region: 'Sertão', population: 14321 },
-  { id: 'brejo-dos-santos', name: 'Brejo dos Santos', region: 'Sertão', population: 6512 },
-  { id: 'caapora', name: 'Caaporã', region: 'Litoral Sul', population: 22123 },
-  { id: 'cabaceiras', name: 'Cabaceiras', region: 'Cariri', population: 5612 },
-  { id: 'cabedelo', name: 'Cabedelo', region: 'Litoral', population: 66519 },
-  { id: 'cachoeira-dos-indios', name: 'Cachoeira dos Índios', region: 'Sertão', population: 10321 },
-  { id: 'cacimba-de-areia', name: 'Cacimba de Areia', region: 'Sertão', population: 3821 },
-  { id: 'cacimba-de-dentro', name: 'Cacimba de Dentro', region: 'Curimataú', population: 17213 },
-  { id: 'cacimbas', name: 'Cacimbas', region: 'Sertão', population: 7123 },
-  { id: 'caicara', name: 'Caiçara', region: 'Agreste', population: 7321 },
-  { id: 'cajazeirinhas', name: 'Cajazeirinhas', region: 'Sertão', population: 3212 },
-  { id: 'caldas-brandao', name: 'Caldas Brandão', region: 'Agreste', population: 6123 },
-  { id: 'camalau', name: 'Camalaú', region: 'Cariri', population: 6012 },
-  { id: 'capim', name: 'Capim', region: 'Litoral Nordeste', population: 6821 },
-  { id: 'caraubas', name: 'Caraúbas', region: 'Cariri', population: 4213 },
-  { id: 'carrapateira', name: 'Carrapateira', region: 'Sertão', population: 2654 },
-  { id: 'casserengue', name: 'Casserengue', region: 'Curimataú', population: 7321 },
-  { id: 'catingueira', name: 'Catingueira', region: 'Sertão', population: 4921 },
-  { id: 'caturite', name: 'Caturité', region: 'Cariri', population: 4821 },
-  { id: 'conceicao', name: 'Conceição', region: 'Sertão', population: 19123 },
-  { id: 'condado', name: 'Condado', region: 'Sertão', population: 6721 },
-  { id: 'conde', name: 'Conde', region: 'Litoral Sul', population: 27605 },
-  { id: 'congo', name: 'Congo', region: 'Cariri', population: 4921 },
-  { id: 'coremas', name: 'Coremas', region: 'Sertão', population: 15612 },
-  { id: 'coxixola', name: 'Coxixola', region: 'Cariri', population: 1921 },
-  { id: 'cruz-do-espirito-santo', name: 'Cruz do Espírito Santo', region: 'Várzea', population: 17654 },
-  { id: 'cubati', name: 'Cubati', region: 'Curimataú', population: 7921 },
-  { id: 'cuite', name: 'Cuité', region: 'Curimataú', population: 20431 },
-  { id: 'cuite-de-mamanguape', name: 'Cuité de Mamanguape', region: 'Litoral Nordeste', population: 6512 },
-  { id: 'cuitegi', name: 'Cuitegi', region: 'Agreste', population: 6921 },
-  { id: 'curral-de-cima', name: 'Curral de Cima', region: 'Litoral Nordeste', population: 5321 },
-  { id: 'curral-velho', name: 'Curral Velho', region: 'Sertão', population: 2512 },
-  { id: 'damiao', name: 'Damião', region: 'Curimataú', population: 5213 },
-  { id: 'desterro', name: 'Desterro', region: 'Sertão', population: 8321 },
-  { id: 'diamante', name: 'Diamante', region: 'Sertão', population: 6612 },
-  { id: 'dona-ines', name: 'Dona Inês', region: 'Curimataú', population: 10512 },
-  { id: 'duas-estradas', name: 'Duas Estradas', region: 'Agreste', population: 3721 },
-  { id: 'emas', name: 'Emas', region: 'Sertão', population: 3512 },
-  { id: 'esperanca', name: 'Esperança', region: 'Agreste', population: 31215 },
-  { id: 'fagundes', name: 'Fagundes', region: 'Agreste', population: 11432 },
-  { id: 'frei-martinho', name: 'Frei Martinho', region: 'Curimataú', population: 3012 },
-  { id: 'gado-bravo', name: 'Gado Bravo', region: 'Agreste', population: 8432 },
-  { id: 'guarabira', name: 'Guarabira', region: 'Brejo', population: 60110 },
-  { id: 'gurinhem', name: 'Gurinhém', region: 'Agreste', population: 14123 },
-  { id: 'gurjao', name: 'Gurjão', region: 'Cariri', population: 3421 },
-  { id: 'ibiara', name: 'Ibiara', region: 'Sertão', population: 6123 },
-  { id: 'igaracy', name: 'Igaracy', region: 'Sertão', population: 6321 },
-  { id: 'imaculada', name: 'Imaculada', region: 'Sertão', population: 11654 },
-  { id: 'inga', name: 'Ingá', region: 'Agreste', population: 18213 },
-  { id: 'itabaiana', name: 'Itabaiana', region: 'Agreste', population: 24512 },
-  { id: 'itaporanga', name: 'Itaporanga', region: 'Sertão', population: 25123 },
-  { id: 'itapororoca', name: 'Itapororoca', region: 'Litoral Nordeste', population: 18765 },
-  { id: 'itatuba', name: 'Itatuba', region: 'Agreste', population: 10921 },
-  { id: 'jacarau', name: 'Jacaraú', region: 'Litoral Nordeste', population: 14512 },
-  { id: 'jerico', name: 'Jericó', region: 'Sertão', population: 7821 },
-  { id: 'joca-claudino', name: 'Joca Claudino', region: 'Sertão', population: 2712 },
-  { id: 'juarez-tavora', name: 'Juarez Távora', region: 'Agreste', population: 7921 },
-  { id: 'juazeirinho', name: 'Juazeirinho', region: 'Seridó', population: 18432 },
-  { id: 'junco-do-serido', name: 'Junco do Seridó', region: 'Seridó', population: 7213 },
-  { id: 'juripiranga', name: 'Juripiranga', region: 'Agreste', population: 10876 },
-  { id: 'juru', name: 'Juru', region: 'Sertão', population: 10012 },
-  { id: 'lagoa', name: 'Lagoa', region: 'Sertão', population: 4821 },
-  { id: 'lagoa-de-dentro', name: 'Lagoa de Dentro', region: 'Agreste', population: 7821 },
-  { id: 'lagoa-seca', name: 'Lagoa Seca', region: 'Agreste', population: 27812 },
-  { id: 'lastro', name: 'Lastro', region: 'Sertão', population: 2843 },
-  { id: 'livramento', name: 'Livramento', region: 'Cariri', population: 7432 },
-  { id: 'logradouro', name: 'Logradouro', region: 'Agreste', population: 4512 },
-  { id: 'lucena', name: 'Lucena', region: 'Litoral Norte', population: 13213 },
-  { id: 'mae-dagua', name: 'Mãe d’Água', region: 'Sertão', population: 4012 },
-  { id: 'malta', name: 'Malta', region: 'Sertão', population: 5765 },
-  { id: 'mamanguape', name: 'Mamanguape', region: 'Litoral Nordeste', population: 44583 },
-  { id: 'manaira', name: 'Manaíra', region: 'Sertão', population: 11123 },
-  { id: 'marcacao', name: 'Marcação', region: 'Litoral Nordeste', population: 8654 },
-  { id: 'mari', name: 'Mari', region: 'Agreste', population: 22123 },
-  { id: 'marizopolis', name: 'Marizópolis', region: 'Sertão', population: 6721 },
-  { id: 'massaranduba', name: 'Massaranduba', region: 'Agreste', population: 14123 },
-  { id: 'mataraca', name: 'Mataraca', region: 'Litoral Nordeste', population: 8654 },
-  { id: 'matinhas', name: 'Matinhas', region: 'Brejo', population: 4512 },
-  { id: 'mato-grosso', name: 'Mato Grosso', region: 'Sertão', population: 2921 },
-  { id: 'matureia', name: 'Maturéia', region: 'Sertão', population: 6721 },
-  { id: 'mogeiro', name: 'Mogeiro', region: 'Agreste', population: 13432 },
-  { id: 'montadas', name: 'Montadas', region: 'Agreste', population: 5821 },
-  { id: 'monte-horebe', name: 'Monte Horebe', region: 'Sertão', population: 4821 },
-  { id: 'monteiro', name: 'Monteiro', region: 'Cariri', population: 32277 },
-  { id: 'mulungu', name: 'Mulungu', region: 'Agreste', population: 10123 },
-  { id: 'natuba', name: 'Natuba', region: 'Agreste', population: 10543 },
-  { id: 'nazarezinho', name: 'Nazarezinho', region: 'Sertão', population: 7321 },
-  { id: 'nova-floresta', name: 'Nova Floresta', region: 'Curimataú', population: 10876 },
-  { id: 'nova-olinda', name: 'Nova Olinda', region: 'Sertão', population: 6123 },
-  { id: 'nova-palmeira', name: 'Nova Palmeira', region: 'Seridó', population: 5012 },
-  { id: 'olho-dagua', name: 'Olho d’Água', region: 'Sertão', population: 7123 },
-  { id: 'olivedos', name: 'Olivedos', region: 'Seridó', population: 3921 },
-  { id: 'ouro-velho', name: 'Ouro Velho', region: 'Cariri', population: 3012 },
-  { id: 'parari', name: 'Parari', region: 'Cariri', population: 1721 },
-  { id: 'passagem', name: 'Passagem', region: 'Sertão', population: 2432 },
-  { id: 'patos', name: 'Patos', region: 'Sertão', population: 108733 },
-  { id: 'paulista', name: 'Paulista', region: 'Sertão', population: 12432 },
-  { id: 'pedra-branca', name: 'Pedra Branca', region: 'Sertão', population: 3821 },
-  { id: 'pedra-lavrada', name: 'Pedra Lavrada', region: 'Seridó', population: 8123 },
-  { id: 'pedras-de-fogo', name: 'Pedras de Fogo', region: 'Litoral Sul', population: 28765 },
-  { id: 'pedro-regis', name: 'Pedro Régis', region: 'Litoral Nordeste', population: 6012 },
-  { id: 'pianco', name: 'Piancó', region: 'Sertão', population: 16432 },
-  { id: 'picui', name: 'Picuí', region: 'Seridó', population: 18765 },
-  { id: 'pilar', name: 'Pilar', region: 'Agreste', population: 12123 },
-  { id: 'piloes', name: 'Pilões', region: 'Brejo', population: 6821 },
-  { id: 'piloezinhos', name: 'Pilõezinhos', region: 'Agreste', population: 5321 },
-  { id: 'pirpirituba', name: 'Pirpirituba', region: 'Agreste', population: 10543 },
-  { id: 'pitimbu', name: 'Pitimbu', region: 'Litoral Sul', population: 19123 },
-  { id: 'pocinhos', name: 'Pocinhos', region: 'Agreste', population: 18765 },
-  { id: 'poco-dantas', name: 'Poço Dantas', region: 'Sertão', population: 3821 },
-  { id: 'poco-de-jose-de-moura', name: 'Poço de José de Moura', region: 'Sertão', population: 4512 },
-  { id: 'pombal', name: 'Pombal', region: 'Sertão', population: 32443 },
-  { id: 'prata', name: 'Prata', region: 'Cariri', population: 4123 },
-  { id: 'princesa-isabel', name: 'Princesa Isabel', region: 'Sertão', population: 23543 },
-  { id: 'puxinana', name: 'Puxinanã', region: 'Agreste', population: 13876 },
-  { id: 'queimadas', name: 'Queimadas', region: 'Agreste', population: 44634 },
-  { id: 'quixaba', name: 'Quixaba', region: 'Sertão', population: 1987 },
-  { id: 'remigio', name: 'Remígio', region: 'Agreste', population: 19876 },
-  { id: 'riachao', name: 'Riachão', region: 'Curimataú', population: 3654 },
-  { id: 'riachao-do-bacamarte', name: 'Riachão do Bacamarte', region: 'Agreste', population: 4567 },
-  { id: 'riachao-do-poco', name: 'Riachão do Poço', region: 'Agreste', population: 4123 },
-  { id: 'riacho-de-santo-antonio', name: 'Riacho de Santo Antônio', region: 'Agreste', population: 3512 },
-  { id: 'riacho-dos-cavalos', name: 'Riacho dos Cavalos', region: 'Sertão', population: 8654 },
-  { id: 'rio-tinto', name: 'Rio Tinto', region: 'Litoral Nordeste', population: 24543 },
-  { id: 'salgadinho', name: 'Salgadinho', region: 'Seridó', population: 3987 },
-  { id: 'salgado-de-sao-felix', name: 'Salgado de São Félix', region: 'Agreste', population: 12345 },
-  { id: 'santa-cecilia', name: 'Santa Cecília', region: 'Agreste', population: 6789 },
-  { id: 'santa-cruz', name: 'Santa Cruz', region: 'Sertão', population: 6543 },
-  { id: 'santa-helena', name: 'Santa Helena', region: 'Sertão', population: 5987 },
-  { id: 'santa-ines', name: 'Santa Inês', region: 'Sertão', population: 3654 },
-  { id: 'santa-luzia', name: 'Santa Luzia', region: 'Seridó', population: 15432 },
-  { id: 'santa-rita', name: 'Santa Rita', region: 'Litoral', population: 149910 },
-  { id: 'santa-teresinha', name: 'Santa Teresinha', region: 'Sertão', population: 4567 },
-  { id: 'santana-de-mangueira', name: 'Santana de Mangueira', region: 'Sertão', population: 5321 },
-  { id: 'santana-dos-garrotes', name: 'Santana dos Garrotes', region: 'Sertão', population: 7321 },
-  { id: 'santo-andre', name: 'Santo André', region: 'Cariri', population: 2543 },
-  { id: 'sao-bentinho', name: 'São Bentinho', region: 'Sertão', population: 4567 },
-  { id: 'sao-bento', name: 'São Bento', region: 'Sertão', population: 35432 },
-  { id: 'sao-domingos', name: 'São Domingos', region: 'Sertão', population: 3123 },
-  { id: 'sao-domingos-do-cariri', name: 'São Domingos do Cariri', region: 'Cariri', population: 2654 },
-  { id: 'sao-francisco', name: 'São Francisco', region: 'Sertão', population: 3432 },
-  { id: 'sao-joao-do-cariri', name: 'São João do Cariri', region: 'Cariri', population: 4321 },
-  { id: 'sao-joao-do-rio-do-peixe', name: 'São João do Rio do Peixe', region: 'Sertão', population: 18432 },
-  { id: 'sao-joao-do-tigre', name: 'São João do Tigre', region: 'Cariri', population: 4432 },
-  { id: 'sao-jose-da-lagoa-tapada', name: 'São José da Lagoa Tapada', region: 'Sertão', population: 7654 },
-  { id: 'sao-jose-de-caiana', name: 'São José de Caiana', region: 'Sertão', population: 6432 },
-  { id: 'sao-jose-de-espinharas', name: 'São José de Espinharas', region: 'Sertão', population: 4765 },
-  { id: 'sao-jose-de-piranhas', name: 'São José de Piranhas', region: 'Sertão', population: 20432 },
-  { id: 'sao-jose-de-princesa', name: 'São José de Princesa', region: 'Sertão', population: 4123 },
-  { id: 'sao-jose-do-bonfim', name: 'São José do Bonfim', region: 'Sertão', population: 3543 },
-  { id: 'sao-jose-do-brejo-do-cruz', name: 'São José do Brejo do Cruz', region: 'Sertão', population: 1987 },
-  { id: 'sao-jose-do-sabugi', name: 'São José do Sabugi', region: 'Sertão', population: 5123 },
-  { id: 'sao-jose-dos-cordeiros', name: 'São José dos Cordeiros', region: 'Cariri', population: 3987 },
-  { id: 'sao-jose-dos-ramos', name: 'São José dos Ramos', region: 'Agreste', population: 5987 },
-  { id: 'sao-mamede', name: 'São Mamede', region: 'Seridó', population: 7654 },
-  { id: 'sao-miguel-de-taipu', name: 'São Miguel de Taipu', region: 'Agreste', population: 6543 },
-  { id: 'sao-sebastiao-de-lagoa-de-roca', name: 'São Sebastião de Lagoa de Roça', region: 'Agreste', population: 11234 },
-  { id: 'sao-sebastiao-do-umbuzeiro', name: 'São Sebastião do Umbuzeiro', region: 'Cariri', population: 3456 },
-  { id: 'sao-vicente-do-serido', name: 'São Vicente do Seridó', region: 'Seridó', population: 10987 },
-  { id: 'serra-branca', name: 'Serra Branca', region: 'Cariri', population: 13432 },
-  { id: 'serra-da-raiz', name: 'Serra da Raiz', region: 'Agreste', population: 3123 },
-  { id: 'serra-grande', name: 'Serra Grande', region: 'Sertão', population: 2987 },
-  { id: 'serra-redonda', name: 'Serra Redonda', region: 'Agreste', population: 7123 },
-  { id: 'serraria', name: 'Serraria', region: 'Brejo', population: 6234 },
-  { id: 'sertaozinho', name: 'Sertãozinho', region: 'Agreste', population: 5123 },
-  { id: 'sobrado', name: 'Sobrado', region: 'Agreste', population: 7821 },
-  { id: 'solanea', name: 'Solânea', region: 'Curimataú', population: 26543 },
-  { id: 'soledade', name: 'Soledade', region: 'Seridó', population: 15123 },
-  { id: 'sossego', name: 'Sossêgo', region: 'Curimataú', population: 3543 },
-  { id: 'sume', name: 'Sumé', region: 'Cariri', population: 17123 },
-  { id: 'tacima', name: 'Tacima', region: 'Curimataú', population: 10234 },
-  { id: 'taperoa', name: 'Taperoá', region: 'Cariri', population: 15432 },
-  { id: 'tavares', name: 'Tavares', region: 'Sertão', population: 14567 },
-  { id: 'teixeira', name: 'Teixeira', region: 'Sertão', population: 15432 },
-  { id: 'tenorio', name: 'Tenório', region: 'Seridó', population: 3123 },
-  { id: 'triunfo', name: 'Triunfo', region: 'Sertão', population: 9654 },
-  { id: 'uirauna', name: 'Uiraúna', region: 'Sertão', population: 15432 },
-  { id: 'umbuzeiro', name: 'Umbuzeiro', region: 'Agreste', population: 9876 },
-  { id: 'varzea', name: 'Várzea', region: 'Seridó', population: 2843 },
-  { id: 'vieiropolis', name: 'Vieirópolis', region: 'Sertão', population: 5321 },
-  { id: 'vista-serrana', name: 'Vista Serrana', region: 'Sertão', population: 3876 },
   { id: 'zabele', name: 'Zabelê', region: 'Cariri', population: 2234 }
 ];
 
@@ -240,79 +25,77 @@ export const generateMetricsForMunicipality = (m: Municipality): Metric[] => {
   const popFactor = m.population / 411807; 
   const randomVar = (base: number, range: number) => base + (Math.random() * range - range / 2);
   
-  // RCL Estimada (Receita Corrente Líquida)
   const rcl = Math.floor(randomVar(120000000, 20000000) * popFactor);
-  // Gasto Pessoal (Simulando variação próxima aos limites da LRF)
   const gastoPessoalPercent = randomVar(49.5, 5); 
   const gastoPessoal = (rcl * gastoPessoalPercent) / 100;
-
-  // Popularidade (0 a 100)
   const popularity = Math.floor(randomVar(65, 15));
 
+  // --- GERAÇÃO DE HOSPITAIS ---
+  const hospitalNames = ['Hosp. Municipal Dr. Severino', 'Maternidade Municipal', 'UPA Central', 'Hosp. de Trauma (Regional)'];
+  const unitsCount = m.population > 200000 ? 4 : m.population > 50000 ? 2 : 1;
+  const hospitalUnits: HospitalUnit[] = Array.from({ length: unitsCount }).map((_, i) => ({
+    name: hospitalNames[i % hospitalNames.length],
+    occupancy: Math.floor(randomVar(78, 20)),
+    totalBeds: Math.floor(40 * (popFactor + 1))
+  }));
+
+  // --- GERAÇÃO DE REDE POR BAIRRO ---
+  const neighborhoods = ['Centro', 'Bairro das Nações', 'Zona Sul', 'Distrito Industrial', 'Alto do Sertão'];
+  const healthNetwork: HealthNetworkNode[] = neighborhoods.map(n => ({
+    neighborhood: n,
+    ubs: Math.max(1, Math.floor(randomVar(4, 3) * (popFactor + 0.5))),
+    upa: Math.random() > 0.7 ? 1 : 0
+  }));
+
   return [
-    // --- MÓDULO COCKPIT FISCAL (LRF) ---
+    // --- COCKPIT FISCAL & POLÍTICO ---
+    { id: `lrf-percent-${m.id}`, municipalityId: m.id, name: 'Gasto com Pessoal (LRF)', value: Number(gastoPessoalPercent.toFixed(2)), unit: '%', previousValue: 47.2, department: Department.FINANCAS, thresholds: { warning: 48.6, critical: 51.3, higherIsBetter: false } },
+    { id: `rcl-${m.id}`, municipalityId: m.id, name: 'Receita Corrente Líquida', value: rcl, unit: 'R$', previousValue: rcl * 0.95, department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
+    { id: `popularity-${m.id}`, municipalityId: m.id, name: 'Aprovação da Gestão', value: popularity, unit: '%', previousValue: 62, department: Department.POLITICO, thresholds: { warning: 50, critical: 40, higherIsBetter: true } },
+
+    // --- SEGURANÇA PÚBLICA ---
+    { id: `s-hom-${m.id}`, municipalityId: m.id, name: 'Homicídios', value: Math.max(0, Math.floor(randomVar(5, 4) * popFactor)), unit: 'ocorr.', previousValue: 4 * popFactor, department: Department.SEGURANCA, thresholds: { warning: 6 * popFactor, critical: 10 * popFactor, higherIsBetter: false } },
+    { id: `s-fem-${m.id}`, municipalityId: m.id, name: 'Feminicídios', value: Math.max(0, Math.floor(randomVar(1, 0.5) * popFactor)), unit: 'ocorr.', previousValue: 0, department: Department.SEGURANCA, thresholds: { warning: 1, critical: 2, higherIsBetter: false } },
+    { id: `s-lat-${m.id}`, municipalityId: m.id, name: 'Latrocínio', value: Math.max(0, Math.floor(randomVar(1, 0.5) * popFactor)), unit: 'ocorr.', previousValue: 0.2 * popFactor, department: Department.SEGURANCA, thresholds: { warning: 1, critical: 2, higherIsBetter: false } },
+    { id: `s-ass-${m.id}`, municipalityId: m.id, name: 'Assaltos', value: Math.floor(randomVar(120, 40) * popFactor), unit: 'ocorr.', previousValue: 110 * popFactor, department: Department.SEGURANCA, thresholds: { warning: 150 * popFactor, critical: 200 * popFactor, higherIsBetter: false } },
+    { id: `s-fur-${m.id}`, municipalityId: m.id, name: 'Furtos', value: Math.floor(randomVar(250, 80) * popFactor), unit: 'ocorr.', previousValue: 240 * popFactor, department: Department.SEGURANCA, thresholds: { warning: 300 * popFactor, critical: 400 * popFactor, higherIsBetter: false } },
+
+    // --- SEGURANÇA VIÁRIA ---
+    { id: `t-acc-${m.id}`, municipalityId: m.id, name: 'Acid. Graves (Carro)', value: Math.floor(randomVar(15, 8) * popFactor), unit: 'ocorr.', previousValue: 12 * popFactor, department: Department.TRANSITO, thresholds: { warning: 20 * popFactor, critical: 30 * popFactor, higherIsBetter: false } },
+    { id: `t-mot-${m.id}`, municipalityId: m.id, name: 'Acid. Motocicletas', value: Math.floor(randomVar(45, 15) * popFactor), unit: 'ocorr.', previousValue: 40 * popFactor, department: Department.TRANSITO, thresholds: { warning: 50 * popFactor, critical: 70 * popFactor, higherIsBetter: false } },
+    { id: `t-fat-${m.id}`, municipalityId: m.id, name: 'Vítimas Fatais (Trânsito)', value: Math.max(0, Math.floor(randomVar(3, 2) * popFactor)), unit: 'vidas', previousValue: 2 * popFactor, department: Department.TRANSITO, thresholds: { warning: 4 * popFactor, critical: 6 * popFactor, higherIsBetter: false } },
+
+    // --- SAÚDE DETALHADA ---
     { 
-      id: `lrf-percent-${m.id}`, 
+      id: `h-units-${m.id}`, 
       municipalityId: m.id, 
-      name: 'Gasto com Pessoal (LRF)', 
-      value: Number(gastoPessoalPercent.toFixed(2)), 
+      name: 'Ocupação Hospitalar por Unidade', 
+      value: Math.floor(hospitalUnits.reduce((acc, u) => acc + u.occupancy, 0) / hospitalUnits.length), 
       unit: '%', 
-      previousValue: 47.2, 
-      department: Department.FINANCAS, 
-      thresholds: { warning: 48.6, critical: 51.3, higherIsBetter: false } 
+      previousValue: 72, 
+      department: Department.SAUDE, 
+      thresholds: { warning: 80, critical: 90, higherIsBetter: false },
+      details: hospitalUnits
     },
     { 
-      id: `rcl-${m.id}`, 
+      id: `h-network-${m.id}`, 
       municipalityId: m.id, 
-      name: 'Receita Corrente Líquida (RCL)', 
-      value: rcl, 
-      unit: 'R$', 
-      previousValue: rcl * 0.95, 
-      department: Department.FINANCAS, 
-      thresholds: { warning: 0, critical: 0, higherIsBetter: true } 
-    },
-    { 
-      id: `gasto-pessoal-rs-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Gasto Real Pessoal', 
-      value: gastoPessoal, 
-      unit: 'R$', 
-      previousValue: gastoPessoal * 0.98, 
-      department: Department.FINANCAS, 
-      thresholds: { warning: 0, critical: 0, higherIsBetter: false } 
+      name: 'Rede de Bairros (UBS/UPA)', 
+      value: healthNetwork.reduce((acc, n) => acc + n.ubs + n.upa, 0), 
+      unit: 'unid.', 
+      previousValue: healthNetwork.length * 2, 
+      department: Department.SAUDE, 
+      thresholds: { warning: 10, critical: 5, higherIsBetter: true },
+      details: healthNetwork
     },
 
-    // --- MÓDULO POLÍTICO ---
-    { 
-      id: `popularity-${m.id}`, 
-      municipalityId: m.id, 
-      name: 'Aprovação da Gestão', 
-      value: popularity, 
-      unit: '%', 
-      previousValue: 62, 
-      department: Department.POLITICO, 
-      thresholds: { warning: 50, critical: 40, higherIsBetter: true } 
-    },
-
-    // SAÚDE
-    { id: `h1-${m.id}`, municipalityId: m.id, name: 'Ocupação de Leitos', value: Math.floor(randomVar(75, 15)), unit: '%', previousValue: 72, department: Department.SAUDE, thresholds: { warning: 80, critical: 90, higherIsBetter: false } },
-    { id: `h2-${m.id}`, municipalityId: m.id, name: 'Nascimentos (Mês)', value: Math.max(1, Math.floor(randomVar(500, 100) * popFactor)), unit: 'bebês', previousValue: Math.floor(480 * popFactor), department: Department.SAUDE, thresholds: { warning: 200 * popFactor, critical: 100 * popFactor, higherIsBetter: true } },
-    { id: `h3-${m.id}`, municipalityId: m.id, name: 'Óbitos (Mês)', value: Math.max(0, Math.floor(randomVar(200, 50) * popFactor)), unit: 'pessoas', previousValue: Math.floor(210 * popFactor), department: Department.SAUDE, thresholds: { warning: 300 * popFactor, critical: 400 * popFactor, higherIsBetter: false } },
-    
-    // EDUCAÇÃO
+    // --- EDUCAÇÃO & INFRA ---
     { id: `e1-${m.id}`, municipalityId: m.id, name: 'Frequência Escolar', value: Math.floor(randomVar(94, 4)), unit: '%', previousValue: 92, department: Department.EDUCACAO, thresholds: { warning: 90, critical: 80, higherIsBetter: true } },
-    { id: `e2-${m.id}`, municipalityId: m.id, name: 'Alunos Matriculados', value: Math.floor(randomVar(50000, 5000) * popFactor), unit: 'alunos', previousValue: Math.floor(48000 * popFactor), department: Department.EDUCACAO, thresholds: { warning: 30000 * popFactor, critical: 20000 * popFactor, higherIsBetter: true } },
-    { id: `e3-${m.id}`, municipalityId: m.id, name: 'Taxa de Evasão', value: Number(randomVar(2.5, 1).toFixed(1)), unit: '%', previousValue: 3.1, department: Department.EDUCACAO, thresholds: { warning: 5, critical: 8, higherIsBetter: false } },
-
-    // INFRAESTRUTURA
-    { id: `i1-${m.id}`, municipalityId: m.id, name: 'Obras Pavimentação', value: Math.max(1, Math.floor(randomVar(8, 6) * (popFactor * 5))), unit: 'frentes', previousValue: 5, department: Department.INFRAESTRUTURA, thresholds: { warning: 3, critical: 1, higherIsBetter: true } },
-
-    // ASSISTÊNCIA
-    { id: `pop-total-${m.id}`, municipalityId: m.id, name: 'População Total', value: m.population, unit: 'hab', previousValue: m.population * 0.99, department: Department.ASSISTENCIA, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
+    { id: `i1-${m.id}`, municipalityId: m.id, name: 'Obras de Pavimentação', value: Math.max(1, Math.floor(randomVar(8, 6) * (popFactor * 5))), unit: 'frentes', previousValue: 5, department: Department.INFRAESTRUTURA, thresholds: { warning: 3, critical: 1, higherIsBetter: true } }
   ];
 };
 
 export const INITIAL_ALERTS: Alert[] = [
   { id: 'al-1', municipalityId: 'campina-grande', title: 'Equilíbrio Fiscal', description: 'Gasto com pessoal está em 48.5% da RCL.', status: 'VERDE', date: '2024-05-22', department: Department.FINANCAS },
-  { id: 'al-2', municipalityId: 'patos', title: 'Recursos Hídricos', description: 'Nível crítico de abastecimento em reservatórios locais.', status: 'VERMELHO', date: '2024-05-22', department: Department.INFRAESTRUTURA },
+  { id: 'al-2', municipalityId: 'patos', title: 'Recursos Hídricos', description: 'Nível crítico de abastecimento.', status: 'VERMELHO', date: '2024-05-22', department: Department.INFRAESTRUTURA },
 ];
