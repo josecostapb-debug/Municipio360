@@ -1,240 +1,231 @@
 
-import React from 'react';
-import { Metric, Alert, Municipality, Department, HospitalUnit, HealthNetworkNode } from '../types';
-import StatCard from '../components/StatCard';
+import React, { useState } from 'react';
+import { Feedback, Municipality, Category, AreaType } from '../types';
 import AIAdvisor from '../components/AIAdvisor';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend, LineChart, Line
-} from 'recharts';
 
 interface DashboardGestorProps {
-  metrics: Metric[];
-  alerts: Alert[];
+  feedbacks: Feedback[];
   municipality: Municipality;
+  onOpenMenu: () => void;
 }
 
-const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, municipality }) => {
-  const COLORS = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const DashboardGestor: React.FC<DashboardGestorProps> = ({ feedbacks, municipality, onOpenMenu }) => {
+  const [filterArea, setFilterArea] = useState<AreaType | 'TODOS'>('TODOS');
   
-  // Extração de Métricas Fiscais
-  const lrfMetric = metrics.find(m => m.id.startsWith('lrf-percent'))!;
-  const arrecadacao = metrics.find(m => m.id.startsWith('arrecadacao'))!;
-  const despesa = metrics.find(m => m.id.startsWith('despesa'))!;
-  const gastoEfetivo = metrics.find(m => m.id.startsWith('gasto-efetivo'))!;
-  const gastoContratado = metrics.find(m => m.id.startsWith('gasto-contratado'))!;
-  const approvalMetric = metrics.find(m => m.id.startsWith('popularity'))!;
-  
-  const safetyMetrics = metrics.filter(m => m.department === Department.SEGURANCA);
-  const transitMetrics = metrics.filter(m => m.department === Department.TRANSITO);
-  const healthDetailMetric = metrics.find(m => m.id.startsWith('h-units'))!;
-  const healthNetworkMetric = metrics.find(m => m.id.startsWith('h-network'))!;
-  
-  const coreOpsMetrics = metrics.filter(m => 
-    (m.department === Department.EDUCACAO || m.department === Department.INFRAESTRUTURA)
-  );
+  const cityFeedbacks = feedbacks.filter(f => f.municipalityId === municipality.id);
+  const filteredFeedbacks = filterArea === 'TODOS' 
+    ? cityFeedbacks 
+    : cityFeedbacks.filter(f => f.areaType === filterArea);
 
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(val);
+  const positiveCount = cityFeedbacks.filter(f => f.sentiment === 'POSITIVO').length;
+  const negativeCount = cityFeedbacks.filter(f => f.sentiment === 'NEGATIVO').length;
+  const total = cityFeedbacks.length || 1;
+  const popularityScore = Math.round((positiveCount / total) * 100);
+
+  const getThermometerColor = (score: number) => {
+    if (score > 70) return 'text-emerald-500';
+    if (score > 40) return 'text-amber-500';
+    return 'text-rose-500';
   };
 
-  const getLRFColor = (val: number) => {
-    if (val <= 48.6) return '#10b981';
-    if (val <= 51.3) return '#f59e0b';
-    return '#ef4444';
-  };
-
-  const getApprovalColor = (val: number) => {
-    if (val >= 60) return '#10b981';
-    if (val >= 40) return '#f59e0b';
-    return '#ef4444';
+  const getSentimentBg = (s: string) => {
+    if (s === 'POSITIVO') return 'bg-emerald-50 border-emerald-100 text-emerald-700';
+    if (s === 'NEGATIVO') return 'bg-rose-50 border-rose-100 text-rose-700';
+    return 'bg-slate-50 border-slate-100 text-slate-700';
   };
 
   return (
-    <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-6 gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            COCKPIT EXECUTIVO 360°
-          </h1>
-          <p className="text-slate-500 font-bold uppercase text-[10px] md:text-xs tracking-widest mt-1">
-            Gestão Estratégica • {municipality.name} - PB
-          </p>
+    <div className="p-4 md:p-8 lg:p-10">
+      <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onOpenMenu}
+            className="lg:hidden p-4 bg-white border border-slate-200 rounded-2xl text-slate-600 shadow-sm hover:bg-slate-50"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">Gabinete de {municipality.name}</h1>
+            <p className="text-slate-500 font-bold uppercase text-[9px] md:text-[10px] tracking-[0.2em] mt-1">Visão Geral de Popularidade</p>
+          </div>
         </div>
-        <div className="text-left md:text-right w-full md:w-auto">
-           <div className="px-3 py-1 bg-slate-900 text-blue-400 rounded-full text-[9px] md:text-[10px] font-black uppercase mb-1 inline-block border border-blue-900/50">Radar Ativo</div>
-           <p className="text-[10px] md:text-xs text-slate-400 font-mono block">REF: {new Date().toLocaleDateString('pt-BR')}</p>
+        
+        <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto gap-1">
+          {['TODOS', AreaType.URBANA, AreaType.RURAL].map((area) => (
+            <button 
+              key={area}
+              onClick={() => setFilterArea(area as any)}
+              className={`whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterArea === area ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              {area === 'TODOS' ? 'Visão Geral' : area}
+            </button>
+          ))}
         </div>
       </header>
 
-      <AIAdvisor metrics={metrics} municipality={municipality} />
-
-      {/* --- INSTRUMENTOS DE VOO (FISCAL E POLÍTICO) --- */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        {/* CARD LRF DETALHADO */}
-        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative border border-white/5 flex flex-col">
-           <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Limite LRF (Folha)</h3>
-              <span className="text-[9px] font-black bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30 tracking-widest">TCE-PB</span>
-           </div>
-           
-           <div className="relative flex justify-center py-2">
-              <svg className="w-48 h-28" viewBox="0 0 100 60">
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" />
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke={getLRFColor(lrfMetric.value)} strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(lrfMetric.value / 60) * 126} 126`} className="transition-all duration-1000" />
-              </svg>
-              <div className="absolute bottom-4 text-center">
-                 <p className="text-4xl font-black">{lrfMetric.value}%</p>
-                 <p className="text-[10px] font-bold text-slate-500 uppercase">Status Atual</p>
-              </div>
-           </div>
-
-           {/* Linha Divisória e Detalhamento (NOVO) */}
-           <div className="mt-6 pt-6 border-t border-white/10 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                 <div>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Arrecadação</p>
-                    <p className="font-mono text-sm font-bold text-emerald-400">{formatCurrency(arrecadacao.value)}</p>
-                 </div>
-                 <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Despesa</p>
-                    <p className="font-mono text-sm font-bold text-rose-400">{formatCurrency(despesa.value)}</p>
-                 </div>
-              </div>
-
-              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                 <p className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3 text-center">Detalhamento da Folha</p>
-                 <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                       <span className="text-[10px] font-bold text-slate-300">Efetivos</span>
-                       <span className="font-mono text-xs">{formatCurrency(gastoEfetivo.value)}</span>
-                    </div>
-                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                       <div style={{ width: `${(gastoEfetivo.value / (gastoEfetivo.value + gastoContratado.value)) * 100}%` }} className="h-full bg-blue-500"></div>
-                    </div>
-                    <div className="flex justify-between items-center mt-2">
-                       <span className="text-[10px] font-bold text-slate-300">Contratados</span>
-                       <span className="font-mono text-xs text-amber-400">{formatCurrency(gastoContratado.value)}</span>
-                    </div>
-                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                       <div style={{ width: `${(gastoContratado.value / (gastoEfetivo.value + gastoContratado.value)) * 100}%` }} className="h-full bg-amber-500"></div>
-                    </div>
-                 </div>
-              </div>
-           </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* CARD TERMÔMETRO - DESTAQUE TOTAL */}
+        <div className="lg:col-span-1 bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center relative group">
+          <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 rounded-t-full"></div>
+          
+          <div className="mb-8">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Índice de Aprovação</h3>
+            <div className="relative inline-block scale-110">
+               <svg className="w-36 h-36 transform -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="transparent" stroke="#f8fafc" strokeWidth="10" />
+                  <circle 
+                    cx="50" cy="50" r="42" fill="transparent" 
+                    stroke="currentColor" strokeWidth="10" 
+                    strokeDasharray={`${(popularityScore / 100) * 264} 264`}
+                    className={`${getThermometerColor(popularityScore)} transition-all duration-1000 ease-out`}
+                    strokeLinecap="round"
+                  />
+               </svg>
+               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className={`text-4xl font-black tracking-tighter ${getThermometerColor(popularityScore)}`}>{popularityScore}%</span>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Popularidade</span>
+               </div>
+            </div>
+          </div>
+          
+          <div className="w-full grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
+             <div>
+                <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1">Positivos</p>
+                <p className="text-xl font-black text-slate-800">{positiveCount}</p>
+             </div>
+             <div>
+                <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1">Negativos</p>
+                <p className="text-xl font-black text-slate-800">{negativeCount}</p>
+             </div>
+          </div>
         </div>
 
-        {/* TERMÔMETRO POLÍTICO */}
-        <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 flex flex-col">
-           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-8">Termômetro Político</h3>
-           <div className="flex flex-1 items-end gap-10 px-4">
-              <div className="w-10 h-full bg-slate-100 rounded-full relative overflow-hidden border border-slate-200 flex flex-col justify-end">
-                 <div style={{ height: `${approvalMetric.value}%`, backgroundColor: getApprovalColor(approvalMetric.value) }} className="w-full transition-all duration-1000 rounded-t-full"></div>
-              </div>
-              <div className="flex-1 pb-4">
-                 <p className="text-6xl font-black text-slate-900 tracking-tighter">{approvalMetric.value}%</p>
-                 <p className="text-sm font-bold text-slate-400 mt-1 uppercase">Aprovação</p>
-              </div>
-           </div>
+        {/* AI ADVISOR */}
+        <div className="lg:col-span-2">
+          <AIAdvisor feedbacks={cityFeedbacks} municipality={municipality} />
+          
+          <div className="grid grid-cols-2 gap-4 mt-6">
+             <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-[2rem]">
+                <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-2">Principal Demanda Urbana</p>
+                <p className="text-sm font-black text-indigo-900 truncate">Sinalização no Bessa</p>
+             </div>
+             <div className="bg-amber-50 border border-amber-100 p-6 rounded-[2rem]">
+                <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-2">Alerta Zona Rural</p>
+                <p className="text-sm font-black text-amber-900 truncate">Estradas em Galante</p>
+             </div>
+          </div>
         </div>
+      </div>
 
-        {/* REDE POR BAIRRO */}
-        <div className="bg-slate-100 rounded-[2.5rem] p-8 border border-slate-200 flex flex-col justify-center">
-           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6 text-center">Rede por Bairro (Atenção Básica)</h3>
-           <div className="space-y-3">
-              {(healthNetworkMetric.details as HealthNetworkNode[]).slice(0, 4).map((node, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200 transition-transform hover:scale-[1.02]">
-                  <span className="text-xs font-bold text-slate-700">{node.neighborhood}</span>
-                  <div className="flex gap-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-[9px] font-black rounded-lg uppercase tracking-widest">UBS: {node.ubs}</span>
-                    {node.upa > 0 && <span className="px-2 py-1 bg-rose-100 text-rose-700 text-[9px] font-black rounded-lg uppercase tracking-widest">UPA: {node.upa}</span>}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* CARD FEEDBACKS - ÁREA CENTRAL */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+               <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                 <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></div>
+                 Relatos em Tempo Real
+               </h3>
+               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Filtrado por: {filterArea}</span>
+            </div>
+            
+            <div className="divide-y divide-slate-50 max-h-[600px] overflow-y-auto custom-scrollbar">
+              {filteredFeedbacks.length > 0 ? filteredFeedbacks.map(f => (
+                <div key={f.id} className="p-8 hover:bg-slate-50/50 transition-colors group">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center font-black text-lg ${getSentimentBg(f.sentiment)}`}>
+                        {f.citizenName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-black text-slate-900 leading-none mb-2">{f.citizenName}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">{f.neighborhood}</span>
+                          <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${f.areaType === AreaType.URBANA ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
+                            {f.areaType}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-black text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl uppercase tracking-tighter shrink-0 bg-white">
+                      {f.category}
+                    </span>
+                  </div>
+                  
+                  <p className="text-slate-700 text-sm font-medium leading-relaxed pl-1">
+                    "{f.comment}"
+                  </p>
+                  
+                  <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-50">
+                    <div className="flex gap-1.5">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className={`w-2 h-2 rounded-full ${i < f.rating ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
+                      ))}
+                    </div>
+                    <div className="flex gap-3">
+                      <button className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors">Marcar Lido</button>
+                      <button className="bg-slate-900 text-white px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-md">Responder</button>
+                    </div>
                   </div>
                 </div>
-              ))}
-           </div>
-        </div>
-      </section>
-
-      {/* --- SAÚDE DETALHADA --- */}
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-blue-600 rounded-full shrink-0"></div>
-        Vigilância Hospitalar (Leitos Municipais)
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {(healthDetailMetric.details as HospitalUnit[]).map((unit, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-all">
-            <div className="absolute top-4 right-4">
-               <div className={`w-2 h-2 rounded-full ${unit.occupancy > 85 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></div>
-            </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{unit.name}</p>
-            <p className="text-3xl font-black text-slate-900">{unit.occupancy}%</p>
-            <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-               <div style={{ width: `${unit.occupancy}%` }} className={`h-full transition-all duration-1000 ${unit.occupancy > 85 ? 'bg-rose-500' : 'bg-blue-600'}`}></div>
-            </div>
-            <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Capacidade: {unit.totalBeds} leitos</p>
-          </div>
-        ))}
-      </div>
-
-      {/* --- SEGURANÇA PÚBLICA --- */}
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-rose-600 rounded-full shrink-0"></div>
-        Segurança Pública e Ordem Social
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
-        {safetyMetrics.map(m => <StatCard key={m.id} metric={m} />)}
-      </div>
-
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-amber-600 rounded-full shrink-0"></div>
-        Segurança Viária e Mobilidade
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
-        {transitMetrics.map(m => <StatCard key={m.id} metric={m} />)}
-      </div>
-
-      <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-        <div className="w-2 h-6 bg-indigo-600 rounded-full shrink-0"></div>
-        Educação e Infraestrutura
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
-        {coreOpsMetrics.map(m => <StatCard key={m.id} metric={m} />)}
-      </div>
-
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
-           <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6">Eficiência Operacional</h3>
-           <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={safetyMetrics.concat(transitMetrics).slice(0, 6)}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 8, fontWeight: 'bold'}} />
-                  <Tooltip cursor={{fill: '#f8fafc'}} />
-                  <Bar dataKey="value" fill="#334155" radius={[10, 10, 0, 0]} barSize={35} />
-                </BarChart>
-              </ResponsiveContainer>
-           </div>
-        </div>
-
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
-          <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">Prioridades de Comando</h3>
-          <div className="space-y-4">
-            {alerts.length > 0 ? alerts.map(alert => (
-              <div key={alert.id} className={`p-5 rounded-2xl border-l-4 shadow-sm transition-transform hover:scale-[1.01] ${alert.status === 'VERMELHO' ? 'bg-rose-50 border-rose-500' : 'bg-amber-50 border-amber-500'}`}>
-                <div className="flex justify-between items-start mb-1">
-                  <span className="text-[9px] font-black uppercase opacity-60">{alert.department}</span>
-                  <span className="text-[9px] font-bold text-slate-400">{alert.date}</span>
+              )) : (
+                <div className="py-24 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                  </div>
+                  <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Sem feedbacks registrados para esta zona</p>
                 </div>
-                <h4 className="font-bold text-slate-900 text-sm md:text-base">{alert.title}</h4>
-                <p className="text-[10px] md:text-xs text-slate-600 mt-1 leading-relaxed">{alert.description}</p>
-              </div>
-            )) : (
-              <div className="py-16 text-center text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest">Sem alertas críticos</div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </section>
+
+        {/* COLUNA LATERAL - STATUS DE ZONAS */}
+        <div className="lg:col-span-1 space-y-8">
+           <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm">
+             <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-8">Zonas Críticas</h3>
+             <div className="space-y-6">
+                {Array.from(new Set(cityFeedbacks.map(f => f.neighborhood))).slice(0, 5).map(nb => {
+                  const nbFeedbacks = cityFeedbacks.filter(f => f.neighborhood === nb);
+                  const nbNeg = nbFeedbacks.filter(f => f.sentiment === 'NEGATIVO').length;
+                  const intensity = Math.min(100, (nbNeg / (nbFeedbacks.length || 1)) * 100);
+                  
+                  return (
+                    <div key={nb} className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center text-[10px] font-black text-slate-600">
+                        <span className="truncate pr-4 uppercase tracking-tighter">{nb}</span>
+                        <span className="text-rose-500">{nbNeg}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden">
+                        <div 
+                          style={{ width: `${intensity}%` }} 
+                          className={`h-full transition-all duration-700 ${intensity > 50 ? 'bg-rose-500' : 'bg-amber-500'}`}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+             </div>
+           </div>
+
+           <div className="bg-indigo-600 p-8 rounded-[3rem] text-white shadow-xl relative overflow-hidden group">
+              <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-3xl transition-transform group-hover:scale-125"></div>
+              <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-4">Metas de Gestão</p>
+              <h4 className="text-xl font-black mb-2 leading-tight">Redução de Críticas em Educação</h4>
+              <p className="text-xs text-indigo-100/60 mb-8 leading-relaxed">Faltam 12 dias para o fechamento da meta trimestral.</p>
+              <div className="flex items-center justify-between text-[10px] font-black mb-2">
+                <span>Progresso</span>
+                <span>65%</span>
+              </div>
+              <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                <div className="w-[65%] h-full bg-white rounded-full"></div>
+              </div>
+           </div>
+        </div>
+      </div>
     </div>
   );
 };

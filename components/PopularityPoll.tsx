@@ -1,154 +1,169 @@
 
 import React, { useState } from 'react';
-import { Municipality } from '../types';
+import { Municipality, Category, AreaType } from '../types';
 import { GoogleGenAI } from "@google/genai";
 
 interface PopularityPollProps {
   municipality: Municipality;
   onClose: () => void;
-  onSuccess: (vote: any) => void;
+  onSuccess: (feedback: any) => void;
 }
 
 const PopularityPoll: React.FC<PopularityPollProps> = ({ municipality, onClose, onSuccess }) => {
-  const [step, setStep] = useState(1); // 1: ID, 2: Rating, 3: Success
+  const [step, setStep] = useState(1); // 1: Perfil, 2: Categoria, 3: Detalhes, 4: Sucesso
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    cpf: '',
-    rating: 50,
-    comment: ''
+    citizenName: '',
+    neighborhood: '',
+    areaType: AreaType.URBANA,
+    category: Category.SAUDE,
+    rating: 3,
+    comment: '',
+    timestamp: new Date().toISOString()
   });
 
-  const handleGeoAndSubmit = async () => {
-    setLoading(true);
-    let coords = null;
+  const [sentimentResult, setSentimentResult] = useState('NEUTRO');
 
-    try {
-      const pos = await new Promise<GeolocationPosition>((res, rej) => {
-        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 });
-      });
-      coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    } catch (e) { console.warn("Geo blocked"); }
+  const handleSubmit = async () => {
+    setLoading(true);
+    let sentiment = 'NEUTRO';
+    
+    // Heurística básica de fallback caso a IA falhe
+    if (formData.rating >= 4) sentiment = 'POSITIVO';
+    if (formData.rating <= 2) sentiment = 'NEGATIVO';
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `Classifique o sentimento deste comentário de um cidadão da cidade de ${municipality.name}: "${formData.comment}". Responda APENAS a palavra POSITIVO, NEUTRO ou NEGATIVO.`,
+        contents: `Analise o sentimento deste comentário público para a prefeitura: "${formData.comment}". Responda APENAS uma das palavras: POSITIVO, NEUTRO ou NEGATIVO.`,
       });
       
-      const sentiment = (response.text?.trim() || 'NEUTRO').toUpperCase();
-      
-      // Simula envio para banco de dados
-      setTimeout(() => {
-        setStep(3); // Vai para tela de sucesso
-        setLoading(false);
-        // Notifica o app pai após um tempo
-        setTimeout(() => onSuccess({ ...formData, coords, sentiment }), 2000);
-      }, 1000);
+      const aiSentiment = (response.text?.trim() || '').toUpperCase();
+      if (['POSITIVO', 'NEUTRO', 'NEGATIVO'].includes(aiSentiment)) {
+        sentiment = aiSentiment;
+      }
     } catch (e) {
-      setStep(3);
+      console.warn("IA indisponível no momento. Usando heurística de rating para o sentimento.");
+      // Mantém o sentimento baseado no rating definido acima
+    } finally {
+      setSentimentResult(sentiment);
+      setStep(4);
       setLoading(false);
-      setTimeout(() => onSuccess({ ...formData, coords, sentiment: 'NEUTRO' }), 2000);
+      
+      setTimeout(() => {
+        onSuccess({ ...formData, sentiment, municipalityId: municipality.id });
+      }, 2500);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-xl">
-      <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-indigo-950/90 backdrop-blur-xl">
+      <div className="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
         
-        {step !== 3 && (
+        {step < 4 && (
           <div className="bg-indigo-600 p-8 text-white relative">
             <button onClick={onClose} className="absolute top-6 right-6 opacity-60 hover:opacity-100 transition-opacity">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Canal Direto com o Prefeito</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Voz do Cidadão</p>
             <h2 className="text-2xl font-black tracking-tight mt-1">{municipality.name} te ouve</h2>
           </div>
         )}
 
-        <div className="p-8">
+        <div className="p-10">
           {step === 1 && (
             <div className="space-y-6 animate-in slide-in-from-right-4">
               <div className="text-center mb-4">
-                <div className="w-16 h-16 bg-indigo-50 rounded-2xl mx-auto flex items-center justify-center text-indigo-600 mb-4">
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                </div>
-                <h3 className="font-bold text-slate-900">Validar Residência</h3>
-                <p className="text-xs text-slate-500 mt-1">Insira seu CPF ou Título para garantir que sua voz seja contada.</p>
+                <h3 className="font-black text-xl text-slate-900">Quem está falando?</h3>
+                <p className="text-xs text-slate-500 mt-1">Identifique-se para que possamos agir.</p>
               </div>
-              <input 
-                type="text" 
-                placeholder="000.000.000-00"
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-bold text-center text-lg"
-                value={formData.cpf}
-                onChange={e => setFormData({...formData, cpf: e.target.value})}
-              />
-              <button 
-                disabled={formData.cpf.length < 11}
-                onClick={() => setStep(2)}
-                className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all disabled:opacity-30 shadow-xl"
-              >
-                Prosseguir para Avaliação
-              </button>
+              <div className="space-y-4">
+                <input 
+                  type="text" placeholder="Seu nome"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-bold"
+                  value={formData.citizenName} onChange={e => setFormData({...formData, citizenName: e.target.value})}
+                />
+                <input 
+                  type="text" placeholder="Seu bairro ou comunidade"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-bold"
+                  value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})}
+                />
+                
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setFormData({...formData, areaType: AreaType.URBANA})}
+                    className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.areaType === AreaType.URBANA ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}
+                  >
+                    Zona Urbana
+                  </button>
+                  <button 
+                    onClick={() => setFormData({...formData, areaType: AreaType.RURAL})}
+                    className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.areaType === AreaType.RURAL ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}
+                  >
+                    Zona Rural
+                  </button>
+                </div>
+              </div>
+              <button disabled={!formData.citizenName || !formData.neighborhood} onClick={() => setStep(2)} className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-100 transition-all disabled:opacity-50">Próximo</button>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-6 animate-in slide-in-from-right-4">
-              <div>
-                <div className="flex justify-between items-end mb-4">
-                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">Sua Nota: <span className={`text-2xl ml-2 ${formData.rating > 60 ? 'text-emerald-500' : formData.rating > 40 ? 'text-amber-500' : 'text-rose-500'}`}>{formData.rating}</span></label>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" max="100" 
-                  className="w-full h-4 bg-slate-100 rounded-full appearance-none cursor-pointer accent-indigo-600"
-                  value={formData.rating}
-                  onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})}
-                />
-                <div className="flex justify-between mt-2 text-[9px] font-black text-slate-400 uppercase">
-                  <span>Insatisfeito</span>
-                  <span>Muito Satisfeito</span>
-                </div>
+              <h3 className="font-black text-xl text-slate-900 text-center">Qual o assunto principal?</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.values(Category).map(cat => (
+                  <button 
+                    key={cat} 
+                    onClick={() => { setFormData({...formData, category: cat}); setStep(3); }}
+                    className="p-4 bg-slate-50 border-2 border-transparent hover:border-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all text-center"
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
-
-              <div>
-                <label className="text-xs font-black uppercase text-slate-400 mb-2 block tracking-widest">O que você diria ao prefeito?</label>
-                <textarea 
-                  placeholder="Seja direto: elogios, críticas ou sugestões de melhoria..."
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-medium min-h-[120px] text-sm"
-                  value={formData.comment}
-                  onChange={e => setFormData({...formData, comment: e.target.value})}
-                ></textarea>
-              </div>
-
-              <button 
-                disabled={loading || !formData.comment}
-                onClick={handleGeoAndSubmit}
-                className="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-xl"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Sincronizando Opinião...
-                  </>
-                ) : (
-                  "Enviar para o Gabinete"
-                )}
-              </button>
+              <button onClick={() => setStep(1)} className="w-full text-[9px] font-black text-slate-400 uppercase tracking-widest">Voltar</button>
             </div>
           )}
 
           {step === 3 && (
+            <div className="space-y-6 animate-in slide-in-from-right-4">
+              <div className="text-center">
+                <p className="text-[10px] font-black text-indigo-600 uppercase mb-2">Avaliação de {formData.category}</p>
+                <div className="flex justify-center gap-2">
+                   {[1,2,3,4,5].map(star => (
+                     <button key={star} onClick={() => setFormData({...formData, rating: star})} className={`text-3xl transition-transform hover:scale-125 ${formData.rating >= star ? 'grayscale-0' : 'grayscale opacity-20'}`}>
+                        {star <= 2 ? '😡' : star === 3 ? '😐' : '😊'}
+                     </button>
+                   ))}
+                </div>
+              </div>
+              <textarea 
+                placeholder="Como podemos melhorar?"
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none font-medium min-h-[150px] text-sm"
+                value={formData.comment} onChange={e => setFormData({...formData, comment: e.target.value})}
+              ></textarea>
+              <button disabled={loading || !formData.comment} onClick={handleSubmit} className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 shadow-xl disabled:opacity-50">
+                {loading ? "Processando Voz..." : "Enviar agora"}
+              </button>
+            </div>
+          )}
+
+          {step === 4 && (
             <div className="py-12 text-center animate-in zoom-in-95 duration-500">
               <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full mx-auto flex items-center justify-center mb-6">
                 <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Obrigado, Cidadão!</h2>
-              <p className="text-sm text-slate-500 mt-2 px-4 leading-relaxed">Sua participação foi registrada. O prefeito verá seu feedback no painel de comando em tempo real.</p>
-              <div className="mt-8 pt-8 border-t border-slate-100">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Município360 • Gestão Transparente</p>
-              </div>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Obrigado!</h2>
+              <p className="text-sm text-slate-500 mt-2 px-4 leading-relaxed">Sua participação é vital para uma gestão melhor em {municipality.name}.</p>
+              
+              <button 
+                onClick={() => onSuccess({ ...formData, sentiment: sentimentResult, municipalityId: municipality.id })}
+                className="mt-10 px-8 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl"
+              >
+                Voltar ao Início
+              </button>
             </div>
           )}
         </div>

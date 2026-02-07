@@ -1,68 +1,62 @@
 
 export enum UserRole {
   PREFEITO = 'PREFEITO',
-  SECRETARIO = 'SECRETARIO',
-  SERVIDOR = 'SERVIDOR',
+  CIDADAO = 'CIDADAO',
   ADMIN = 'ADMIN',
-  CIDADAO = 'CIDADAO'
+  SECRETARIO = 'SECRETARIO',
+  SERVIDOR = 'SERVIDOR'
 }
 
+export enum AreaType {
+  URBANA = 'Zona Urbana',
+  RURAL = 'Zona Rural'
+}
+
+export enum Category {
+  SAUDE = 'Saúde',
+  EDUCACAO = 'Educação',
+  INFRAESTRUTURA = 'Infraestrutura',
+  ILUMINACAO = 'Iluminação',
+  SEGURANCA = 'Segurança',
+  LIMPEZA = 'Limpeza Urbana',
+  ELOGIO = 'Elogio',
+  SUGESTAO = 'Sugestão'
+}
+
+// Fix: Added Department enum used in EnvioDados.tsx
 export enum Department {
   SAUDE = 'Saúde',
   EDUCACAO = 'Educação',
   INFRAESTRUTURA = 'Infraestrutura',
   FINANCAS = 'Finanças',
-  ASSISTENCIA = 'Assistência Social',
-  POLITICO = 'Gestão Política',
-  SEGURANCA = 'Segurança Pública',
-  TRANSITO = 'Segurança Viária'
+  ADMINISTRACAO = 'Administração',
+  SEGURANCA = 'Segurança',
+  LIMPEZA = 'Limpeza Urbana'
 }
 
+export type Sentiment = 'POSITIVO' | 'NEUTRO' | 'NEGATIVO';
+
+// Fix: Added Status type used in StatCard.tsx
 export type Status = 'VERDE' | 'AMARELO' | 'VERMELHO';
 
 export interface Municipality {
   id: string;
   name: string;
   region: string;
-  population: number;
 }
 
-export interface HospitalUnit {
-  name: string;
-  occupancy: number;
-  totalBeds: number;
-}
-
-export interface HealthNetworkNode {
+export interface Feedback {
+  id: string;
+  municipalityId: string;
+  citizenName: string;
   neighborhood: string;
-  ubs: number;
-  upa: number;
-}
-
-export interface Metric {
-  id: string;
-  municipalityId: string;
-  name: string;
-  value: number;
-  unit: string;
-  previousValue: number;
-  thresholds: {
-    warning: number;
-    critical: number;
-    higherIsBetter: boolean;
-  };
-  department: Department;
-  details?: any; // Para dados complexos como lista de hospitais
-}
-
-export interface Alert {
-  id: string;
-  municipalityId: string;
-  title: string;
-  description: string;
-  status: Status;
-  date: string;
-  department: Department;
+  areaType: AreaType;
+  category: Category;
+  sentiment: Sentiment;
+  comment: string;
+  rating: number; // 1 a 5
+  timestamp: string;
+  status: 'LIDO' | 'PENDENTE' | 'RESOLVIDO';
 }
 
 export interface User {
@@ -70,15 +64,21 @@ export interface User {
   name: string;
   role: UserRole;
   municipalityId: string;
+  // Fix: Added optional department property for governmental users
   department?: Department;
 }
 
-export interface Vote {
+// Fix: Added Metric interface used in StatCard.tsx
+export interface Metric {
   id: string;
-  municipalityId: string;
-  rating: number; 
-  comment: string;
-  sentiment: 'POSITIVO' | 'NEUTRO' | 'NEGATIVO';
-  coords?: { lat: number; lng: number };
-  timestamp: string;
+  name: string;
+  department: string;
+  value: number;
+  previousValue: number;
+  unit: string;
+  thresholds: {
+    warning: number;
+    critical: number;
+    higherIsBetter: boolean;
+  };
 }
