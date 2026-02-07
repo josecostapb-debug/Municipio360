@@ -9,7 +9,7 @@ interface SidebarProps {
   onLogout: () => void;
   municipalityName: string;
   onSwitchMunicipality?: () => void;
-  isOpen?: boolean; // New prop for mobile control
+  isOpen?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -25,11 +25,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={`
-      w-64 h-screen bg-slate-900 text-white flex flex-col fixed left-0 top-0 z-40 border-r border-white/5 
-      transition-transform duration-300 ease-in-out
+      w-64 h-full bg-slate-900 text-white flex flex-col fixed lg:static left-0 top-0 z-40 border-r border-white/5 
+      transition-transform duration-300 ease-in-out shrink-0
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     `}>
-      <div className="p-6 border-b border-slate-800">
+      <div className="p-6 border-b border-slate-800 shrink-0">
         <h1 className="text-xl font-black flex items-center gap-2 mb-6">
           <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 text-xs tracking-tighter shrink-0">360</div>
           Município360
@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-800 bg-black/10">
+      <div className="p-4 border-t border-slate-800 bg-black/10 shrink-0">
         <div className="flex items-center gap-3 mb-4 px-2">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm font-bold border border-slate-600 shadow-inner shrink-0">
             {user.name.charAt(0)}

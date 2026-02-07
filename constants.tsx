@@ -26,11 +26,19 @@ export const generateMetricsForMunicipality = (m: Municipality): Metric[] => {
   const randomVar = (base: number, range: number) => base + (Math.random() * range - range / 2);
   
   const rcl = Math.floor(randomVar(120000000, 20000000) * popFactor);
+  const arrecadacaoTotal = rcl * 1.15; // Arrecadação geralmente maior que RCL
+  const despesaTotal = arrecadacaoTotal * randomVar(0.92, 0.05);
+  
   const gastoPessoalPercent = randomVar(49.5, 5); 
-  const gastoPessoal = (rcl * gastoPessoalPercent) / 100;
+  const gastoPessoalTotal = (rcl * gastoPessoalPercent) / 100;
+  
+  // Divisão da folha (TCE-PB)
+  const percentEfetivos = randomVar(75, 10);
+  const gastoEfetivos = (gastoPessoalTotal * percentEfetivos) / 100;
+  const gastoContratados = gastoPessoalTotal - gastoEfetivos;
+
   const popularity = Math.floor(randomVar(65, 15));
 
-  // --- GERAÇÃO DE HOSPITAIS ---
   const hospitalNames = ['Hosp. Municipal Dr. Severino', 'Maternidade Municipal', 'UPA Central', 'Hosp. de Trauma (Regional)'];
   const unitsCount = m.population > 200000 ? 4 : m.population > 50000 ? 2 : 1;
   const hospitalUnits: HospitalUnit[] = Array.from({ length: unitsCount }).map((_, i) => ({
@@ -39,7 +47,6 @@ export const generateMetricsForMunicipality = (m: Municipality): Metric[] => {
     totalBeds: Math.floor(40 * (popFactor + 1))
   }));
 
-  // --- GERAÇÃO DE REDE POR BAIRRO ---
   const neighborhoods = ['Centro', 'Bairro das Nações', 'Zona Sul', 'Distrito Industrial', 'Alto do Sertão'];
   const healthNetwork: HealthNetworkNode[] = neighborhoods.map(n => ({
     neighborhood: n,
@@ -50,7 +57,10 @@ export const generateMetricsForMunicipality = (m: Municipality): Metric[] => {
   return [
     // --- COCKPIT FISCAL & POLÍTICO ---
     { id: `lrf-percent-${m.id}`, municipalityId: m.id, name: 'Gasto com Pessoal (LRF)', value: Number(gastoPessoalPercent.toFixed(2)), unit: '%', previousValue: 47.2, department: Department.FINANCAS, thresholds: { warning: 48.6, critical: 51.3, higherIsBetter: false } },
-    { id: `rcl-${m.id}`, municipalityId: m.id, name: 'Receita Corrente Líquida', value: rcl, unit: 'R$', previousValue: rcl * 0.95, department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
+    { id: `arrecadacao-${m.id}`, municipalityId: m.id, name: 'Arrecadação Total', value: arrecadacaoTotal, unit: 'R$', previousValue: arrecadacaoTotal * 0.98, department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: true } },
+    { id: `despesa-${m.id}`, municipalityId: m.id, name: 'Despesa Total', value: despesaTotal, unit: 'R$', previousValue: despesaTotal * 0.97, department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: false } },
+    { id: `gasto-efetivo-${m.id}`, municipalityId: m.id, name: 'Pessoal Efetivo', value: gastoEfetivos, unit: 'R$', previousValue: gastoEfetivos * 0.99, department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: false } },
+    { id: `gasto-contratado-${m.id}`, municipalityId: m.id, name: 'Pessoal Contratado', value: gastoContratados, unit: 'R$', previousValue: gastoContratados * 1.05, department: Department.FINANCAS, thresholds: { warning: 0, critical: 0, higherIsBetter: false } },
     { id: `popularity-${m.id}`, municipalityId: m.id, name: 'Aprovação da Gestão', value: popularity, unit: '%', previousValue: 62, department: Department.POLITICO, thresholds: { warning: 50, critical: 40, higherIsBetter: true } },
 
     // --- SEGURANÇA PÚBLICA ---

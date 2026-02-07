@@ -17,7 +17,12 @@ interface DashboardGestorProps {
 const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, municipality }) => {
   const COLORS = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
   
+  // Extração de Métricas Fiscais
   const lrfMetric = metrics.find(m => m.id.startsWith('lrf-percent'))!;
+  const arrecadacao = metrics.find(m => m.id.startsWith('arrecadacao'))!;
+  const despesa = metrics.find(m => m.id.startsWith('despesa'))!;
+  const gastoEfetivo = metrics.find(m => m.id.startsWith('gasto-efetivo'))!;
+  const gastoContratado = metrics.find(m => m.id.startsWith('gasto-contratado'))!;
   const approvalMetric = metrics.find(m => m.id.startsWith('popularity'))!;
   
   const safetyMetrics = metrics.filter(m => m.department === Department.SEGURANCA);
@@ -28,6 +33,10 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
   const coreOpsMetrics = metrics.filter(m => 
     (m.department === Department.EDUCACAO || m.department === Department.INFRAESTRUTURA)
   );
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(val);
+  };
 
   const getLRFColor = (val: number) => {
     if (val <= 48.6) return '#10b981';
@@ -63,20 +72,60 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
 
       {/* --- INSTRUMENTOS DE VOO (FISCAL E POLÍTICO) --- */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative border border-white/5">
-           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Limite LRF (Gasto Pessoal)</h3>
-           <div className="relative flex justify-center py-4">
-              <svg className="w-48 h-32" viewBox="0 0 100 60">
+        {/* CARD LRF DETALHADO */}
+        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative border border-white/5 flex flex-col">
+           <div className="flex justify-between items-start mb-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Limite LRF (Folha)</h3>
+              <span className="text-[9px] font-black bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30 tracking-widest">TCE-PB</span>
+           </div>
+           
+           <div className="relative flex justify-center py-2">
+              <svg className="w-48 h-28" viewBox="0 0 100 60">
                 <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" />
                 <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke={getLRFColor(lrfMetric.value)} strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(lrfMetric.value / 60) * 126} 126`} className="transition-all duration-1000" />
               </svg>
-              <div className="absolute bottom-6 text-center">
+              <div className="absolute bottom-4 text-center">
                  <p className="text-4xl font-black">{lrfMetric.value}%</p>
-                 <p className="text-[10px] font-bold text-slate-500 uppercase">TCE-PB STATUS</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase">Status Atual</p>
+              </div>
+           </div>
+
+           {/* Linha Divisória e Detalhamento (NOVO) */}
+           <div className="mt-6 pt-6 border-t border-white/10 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                 <div>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Arrecadação</p>
+                    <p className="font-mono text-sm font-bold text-emerald-400">{formatCurrency(arrecadacao.value)}</p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Despesa</p>
+                    <p className="font-mono text-sm font-bold text-rose-400">{formatCurrency(despesa.value)}</p>
+                 </div>
+              </div>
+
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                 <p className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3 text-center">Detalhamento da Folha</p>
+                 <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                       <span className="text-[10px] font-bold text-slate-300">Efetivos</span>
+                       <span className="font-mono text-xs">{formatCurrency(gastoEfetivo.value)}</span>
+                    </div>
+                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                       <div style={{ width: `${(gastoEfetivo.value / (gastoEfetivo.value + gastoContratado.value)) * 100}%` }} className="h-full bg-blue-500"></div>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                       <span className="text-[10px] font-bold text-slate-300">Contratados</span>
+                       <span className="font-mono text-xs text-amber-400">{formatCurrency(gastoContratado.value)}</span>
+                    </div>
+                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                       <div style={{ width: `${(gastoContratado.value / (gastoEfetivo.value + gastoContratado.value)) * 100}%` }} className="h-full bg-amber-500"></div>
+                    </div>
+                 </div>
               </div>
            </div>
         </div>
 
+        {/* TERMÔMETRO POLÍTICO */}
         <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 flex flex-col">
            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-8">Termômetro Político</h3>
            <div className="flex flex-1 items-end gap-10 px-4">
@@ -90,15 +139,16 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
            </div>
         </div>
 
+        {/* REDE POR BAIRRO */}
         <div className="bg-slate-100 rounded-[2.5rem] p-8 border border-slate-200 flex flex-col justify-center">
            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6 text-center">Rede por Bairro (Atenção Básica)</h3>
            <div className="space-y-3">
               {(healthNetworkMetric.details as HealthNetworkNode[]).slice(0, 4).map((node, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200">
+                <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200 transition-transform hover:scale-[1.02]">
                   <span className="text-xs font-bold text-slate-700">{node.neighborhood}</span>
                   <div className="flex gap-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-[9px] font-black rounded-lg">UBS: {node.ubs}</span>
-                    {node.upa > 0 && <span className="px-2 py-1 bg-rose-100 text-rose-700 text-[9px] font-black rounded-lg">UPA: {node.upa}</span>}
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-[9px] font-black rounded-lg uppercase tracking-widest">UBS: {node.ubs}</span>
+                    {node.upa > 0 && <span className="px-2 py-1 bg-rose-100 text-rose-700 text-[9px] font-black rounded-lg uppercase tracking-widest">UPA: {node.upa}</span>}
                   </div>
                 </div>
               ))}
@@ -106,14 +156,14 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
         </div>
       </section>
 
-      {/* --- SAÚDE DETALHADA: OCUPAÇÃO POR UNIDADE --- */}
+      {/* --- SAÚDE DETALHADA --- */}
       <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
         <div className="w-2 h-6 bg-blue-600 rounded-full shrink-0"></div>
         Vigilância Hospitalar (Leitos Municipais)
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {(healthDetailMetric.details as HospitalUnit[]).map((unit, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden">
+          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-all">
             <div className="absolute top-4 right-4">
                <div className={`w-2 h-2 rounded-full ${unit.occupancy > 85 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></div>
             </div>
@@ -122,12 +172,12 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
             <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                <div style={{ width: `${unit.occupancy}%` }} className={`h-full transition-all duration-1000 ${unit.occupancy > 85 ? 'bg-rose-500' : 'bg-blue-600'}`}></div>
             </div>
-            <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase">Total: {unit.totalBeds} leitos ativos</p>
+            <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Capacidade: {unit.totalBeds} leitos</p>
           </div>
         ))}
       </div>
 
-      {/* --- SEGURANÇA PÚBLICA E VIÁRIA --- */}
+      {/* --- SEGURANÇA PÚBLICA --- */}
       <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
         <div className="w-2 h-6 bg-rose-600 rounded-full shrink-0"></div>
         Segurança Pública e Ordem Social
@@ -144,7 +194,6 @@ const DashboardGestor: React.FC<DashboardGestorProps> = ({ metrics, alerts, muni
         {transitMetrics.map(m => <StatCard key={m.id} metric={m} />)}
       </div>
 
-      {/* --- OUTROS INDICADORES --- */}
       <h2 className="text-lg md:text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
         <div className="w-2 h-6 bg-indigo-600 rounded-full shrink-0"></div>
         Educação e Infraestrutura
